@@ -16,10 +16,11 @@
 
 package simblock.simulator;
 
+import simblock.task.Task;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.PriorityQueue;
-import simblock.task.Task;
 
 
 /**
@@ -33,6 +34,10 @@ public class Timer {
    * A sorted queue of scheduled tasks.
    */
   private static final PriorityQueue<ScheduledTask> taskQueue = new PriorityQueue<>();
+
+  public static PriorityQueue<ScheduledTask> getTasks(){
+    return taskQueue;
+  }
 
   /**
    * A map containing a mapping of all tasks to their ScheduledTask counterparts. When
