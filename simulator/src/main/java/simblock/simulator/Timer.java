@@ -16,10 +16,11 @@
 
 package simblock.simulator;
 
+import simblock.task.Task;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.PriorityQueue;
-import simblock.task.Task;
 
 
 /**
@@ -33,6 +34,10 @@ public class Timer {
    * A sorted queue of scheduled tasks.
    */
   private static final PriorityQueue<ScheduledTask> taskQueue = new PriorityQueue<>();
+
+  public static PriorityQueue<ScheduledTask> getTasks(){
+    return taskQueue;
+  }
 
   /**
    * A map containing a mapping of all tasks to their ScheduledTask counterparts. When
@@ -151,7 +156,11 @@ public class Timer {
    *
    * @param task the task
    */
-  public static void putTask(Task task) {
+  public static void putTask(Task task){
+    if(taskMap.containsKey(task)){
+      System.err.println("Can't insert same task to the task queue multiple times");
+      return;
+    }
     ScheduledTask scheduledTask = new ScheduledTask(task, currentTime + task.getInterval());
     taskMap.put(task, scheduledTask);
     taskQueue.add(scheduledTask);
