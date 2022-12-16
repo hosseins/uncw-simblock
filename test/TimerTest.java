@@ -64,8 +64,18 @@ public class TimerTest {
         Node tn = new Node(1, 1, 1, 10, TABLE,
                 ALGO, true, true);
         Block b = Block.genesisBlock(fn);
-        Task t = new InvMessageTask(fn, tn, b);
-        Timer.putTaskAbsoluteTime(t, 10);
+        Task t1 = new InvMessageTask(fn, tn, b);
+        Timer.putTaskAbsoluteTime(t1, 10);
+
+        System.out.println(t1);
+
+        Task t2 = new InvMessageTask(fn, tn, b);
+        Timer.putTaskAbsoluteTime(t2, 5);
+
+        System.out.println(t2);
+        // getTask gets the first element
+        // but does not remove it from the priority queue
+        Assert.assertEquals(t2, Timer.getTask());
     }
 
 }

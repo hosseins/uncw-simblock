@@ -174,6 +174,10 @@ public class Timer {
    */
   @SuppressWarnings("unused")
   public static void putTaskAbsoluteTime(Task task, long time) {
+    if(taskMap.containsKey(task)){
+      System.err.println("Can't insert same task to the task queue multiple times");
+      return;
+    }
     ScheduledTask scheduledTask = new ScheduledTask(task, time);
     taskMap.put(task, scheduledTask);
     taskQueue.add(scheduledTask);
