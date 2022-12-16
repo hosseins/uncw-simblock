@@ -156,7 +156,11 @@ public class Timer {
    *
    * @param task the task
    */
-  public static void putTask(Task task) {
+  public static void putTask(Task task){
+    if(taskMap.containsKey(task)){
+      System.err.println("Can't insert same task to the task queue multiple times");
+      return;
+    }
     ScheduledTask scheduledTask = new ScheduledTask(task, currentTime + task.getInterval());
     taskMap.put(task, scheduledTask);
     taskQueue.add(scheduledTask);
