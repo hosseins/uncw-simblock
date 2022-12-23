@@ -31,30 +31,20 @@ import static simblock.simulator.Main.random;
 @SuppressWarnings("unused")
 public class ProofOfWork extends AbstractConsensusAlgo {
   /**
-   * Instantiates a new Proof of work consensus algorithm.
-   *
-   * @param selfNode the self node
-   */
-  public ProofOfWork(Node selfNode) {
-    super(selfNode);
-  }
-
-  /**
    * Mints a new block by simulating Proof of Work.
    */
   @Override
-  public MiningTask minting() {
-    Node selfNode = this.getSelfNode();
-    if(selfNode==null || selfNode.getBlock()==null){
+  public MiningTask CreateMintingTask(Node node) {
+    if(node==null || node.getCurrentBlock()==null){
       System.err.println("Node or block is null!");
       return null;
     }
-    ProofOfWorkBlock block = (ProofOfWorkBlock) selfNode.getBlock();
+    ProofOfWorkBlock block = (ProofOfWorkBlock) node.getCurrentBlock();
     BigInteger difficulty = block.getNextDifficulty();
     double p = 1.0 / difficulty.doubleValue();
     double u = random.nextDouble();
-    return p <= Math.pow(2, -53) ? null : new MiningTask(selfNode, (long) (Math.log(u) / Math.log(
-        1.0 - p) / selfNode.getMiningPower()), difficulty);
+    return p <= Math.pow(2, -53) ? null : new MiningTask(node, (long) (Math.log(u) / Math.log(
+        1.0 - p) / node.getMiningPower()), difficulty);
   }
 
   /**
@@ -89,8 +79,8 @@ public class ProofOfWork extends AbstractConsensusAlgo {
   }
 
   @Override
-  public ProofOfWorkBlock genesisBlock() {
-    return ProofOfWorkBlock.genesisBlock(this.getSelfNode());
+  public ProofOfWorkBlock genesisBlock(Node node) {
+    return ProofOfWorkBlock.genesisBlock(node);
   }
 
 }

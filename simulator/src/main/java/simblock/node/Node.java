@@ -129,8 +129,7 @@ public class Node {
     try {
       this.routingTable = (AbstractRoutingTable) Class.forName(routingTableName).getConstructor(
           Node.class).newInstance(this);
-      this.consensusAlgo = (AbstractConsensusAlgo) Class.forName(consensusAlgoName).getConstructor(
-          Node.class).newInstance(this);
+      this.consensusAlgo = (AbstractConsensusAlgo) Class.forName(consensusAlgoName).getConstructor().newInstance();
       this.setNumConnection(numConnection);
     } catch (Exception e) {
       e.printStackTrace();
@@ -188,7 +187,7 @@ public class Node {
    *
    * @return the block
    */
-  public Block getBlock() {
+  public Block getCurrentBlock() {
     return this.currentBlock;
   }
 
@@ -262,7 +261,7 @@ public class Node {
    * Mint the genesis block.
    */
   public void genesisBlock() {
-    Block genesis = this.consensusAlgo.genesisBlock();
+    Block genesis = this.consensusAlgo.genesisBlock(this);
     this.receiveBlock(genesis);
   }
 
@@ -327,7 +326,7 @@ public class Node {
    * Generates a new minting task and registers it
    */
   public void minting() {
-    AbstractMintingTask task = this.consensusAlgo.minting();
+    AbstractMintingTask task = this.consensusAlgo.CreateMintingTask(this);
     this.mintingTask = task;
     if (task != null) {
       Timer.getSimulationTimer().putTask(task);

@@ -139,7 +139,7 @@ public class Main {
     Set<Block> blocks = new HashSet<>();
 
     // Get the latest block from the first simulated node
-    Block block = getSimulatedNodes().get(0).getBlock();
+    Block block = getSimulatedNodes().get(0).getCurrentBlock();
 
     //Update the list of known blocks by adding the parents of the aforementioned block
     while (block.getParent() != null) {
