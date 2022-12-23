@@ -17,8 +17,8 @@
 package simblock.node;
 
 import simblock.block.Block;
-import simblock.node.consensus.AbstractConsensusAlgo;
 import simblock.node.routing.AbstractRoutingTable;
+import simblock.simulator.Simulator;
 import simblock.simulator.Timer;
 import simblock.task.*;
 
@@ -56,11 +56,6 @@ public class Node {
    * A nodes routing table.
    */
   private AbstractRoutingTable routingTable;
-
-  /**
-   * The consensus algorithm used by the node.
-   */
-  private AbstractConsensusAlgo consensusAlgo;
 
   /**
    * Whether the node uses compact block relay.
@@ -129,7 +124,6 @@ public class Node {
     try {
       this.routingTable = (AbstractRoutingTable) Class.forName(routingTableName).getConstructor(
           Node.class).newInstance(this);
-      this.consensusAlgo = (AbstractConsensusAlgo) Class.forName(consensusAlgoName).getConstructor().newInstance();
       this.setNumConnection(numConnection);
     } catch (Exception e) {
       e.printStackTrace();
@@ -163,15 +157,6 @@ public class Node {
     return this.miningPower;
   }
 
-  /**
-   * Gets the consensus algorithm.
-   *
-   * @return the consensus algorithm. See {@link AbstractConsensusAlgo}
-   */
-  @SuppressWarnings("unused")
-  public AbstractConsensusAlgo getConsensusAlgo() {
-    return this.consensusAlgo;
-  }
 
   /**
    * Gets routing table.
@@ -261,7 +246,7 @@ public class Node {
    * Mint the genesis block.
    */
   public void genesisBlock() {
-    Block genesis = this.consensusAlgo.genesisBlock(this);
+    Block genesis = Simulator.getConsensusAlgo().genesisBlock(this);
     this.receiveBlock(genesis);
   }
 
@@ -326,7 +311,7 @@ public class Node {
    * Generates a new minting task and registers it
    */
   public void minting() {
-    AbstractMintingTask task = this.consensusAlgo.CreateMintingTask(this);
+    AbstractMintingTask task = Simulator.getConsensusAlgo().CreateMintingTask(this);
     this.mintingTask = task;
     if (task != null) {
       Timer.getSimulationTimer().putTask(task);
@@ -351,7 +336,7 @@ public class Node {
    * @param block the block
    */
   public void receiveBlock(Block block) {
-    if (this.consensusAlgo.isReceivedBlockValid(block, this.currentBlock)) {
+    if (Simulator.getConsensusAlgo().isReceivedBlockValid(block, this.currentBlock)) {
       if (this.currentBlock != null && !this.currentBlock.isOnSameChainAs(block)) {
         // If orphan mark orphan
         this.addOrphans(this.currentBlock, block);
@@ -382,7 +367,7 @@ public class Node {
     if (message instanceof InvMessageTask) {
       Block block = ((InvMessageTask) message).getBlock();
       if (!this.orphans.contains(block) && !this.downloadingBlocks.contains(block)) {
-        if (this.consensusAlgo.isReceivedBlockValid(block, this.currentBlock)) {
+        if (Simulator.getConsensusAlgo().isReceivedBlockValid(block, this.currentBlock)) {
           AbstractMessageTask task = new RecMessageTask(this, from, block);
           Timer.getSimulationTimer().putTask(task);
           downloadingBlocks.add(block);

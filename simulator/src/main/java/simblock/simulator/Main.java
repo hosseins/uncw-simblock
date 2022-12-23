@@ -93,6 +93,7 @@ public class Main {
   public static void main(String[] args) {
 
     Timer.InitTimer();
+    Simulator.InitSimulator(ALGO);
 
     final long start = System.currentTimeMillis();
     setTargetInterval(INTERVAL);

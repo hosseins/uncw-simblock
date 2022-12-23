@@ -16,13 +16,15 @@
 
 package simblock.simulator;
 
-import static simblock.simulator.Timer.getCurrentTime;
+import simblock.block.Block;
+import simblock.node.Node;
+import simblock.node.consensus.AbstractConsensusAlgo;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import simblock.block.Block;
-import simblock.node.Node;
+
+import static simblock.simulator.Timer.getCurrentTime;
 
 
 /**
@@ -40,6 +42,28 @@ public class Simulator {
    * The target block interval in milliseconds.
    */
   private static long targetInterval;
+
+
+  private static AbstractConsensusAlgo consensusAlgo = null;
+
+  public static void InitSimulator(String consensusAlgoStr){
+    try{
+      Simulator.consensusAlgo = (AbstractConsensusAlgo) Class.forName(consensusAlgoStr).getConstructor().newInstance();
+    } catch (ClassNotFoundException e) {
+      System.err.println("Class not found");
+      e.printStackTrace();
+    }catch (NoSuchMethodException e) {
+      System.err.println("Method not found");
+      e.printStackTrace();
+    }catch (Exception e){
+      e.printStackTrace();
+    }
+    Simulator.consensusAlgo = consensusAlgo;
+  }
+
+  public static AbstractConsensusAlgo getConsensusAlgo(){
+    return Simulator.consensusAlgo;
+  }
 
   /**
    * Get simulated nodes list.

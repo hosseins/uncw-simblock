@@ -3,6 +3,7 @@ import org.junit.Before;
 import org.junit.Test;
 import simblock.block.Block;
 import simblock.node.Node;
+import simblock.simulator.Simulator;
 import simblock.simulator.Timer;
 import simblock.task.InvMessageTask;
 import simblock.task.RecMessageTask;
@@ -15,6 +16,7 @@ public class TimerTest {
     @Before
     public void init() {
         Timer.InitTimer();
+        Simulator.InitSimulator(ALGO);
     }
 
     @Test

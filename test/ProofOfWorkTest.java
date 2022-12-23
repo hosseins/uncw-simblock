@@ -3,6 +3,7 @@ import org.junit.Before;
 import org.junit.Test;
 import simblock.node.Node;
 import simblock.node.consensus.ProofOfWork;
+import simblock.simulator.Simulator;
 import simblock.simulator.Timer;
 import simblock.task.MiningTask;
 
@@ -13,6 +14,7 @@ public class ProofOfWorkTest {
     @Before
     public void init() {
         Timer.InitTimer();
+        Simulator.InitSimulator(ALGO);
     }
 
     @Test
