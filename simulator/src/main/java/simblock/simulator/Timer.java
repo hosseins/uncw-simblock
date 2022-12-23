@@ -33,9 +33,23 @@ public class Timer {
   /**
    * A sorted queue of scheduled tasks.
    */
-  private static final PriorityQueue<ScheduledTask> taskQueue = new PriorityQueue<>();
+  private final PriorityQueue<ScheduledTask> taskQueue = new PriorityQueue<>();
+  public static Timer SimulationTimer = null;
 
-  public static PriorityQueue<ScheduledTask> getTasks(){
+  public static void InitTimer() {
+    SimulationTimer = new Timer();
+  }
+
+  public static Timer getSimulationTimer()
+  {
+    if(SimulationTimer==null)
+    {
+      throw new NullPointerException("simulation timer singleton is not initialized");
+    }
+    return SimulationTimer;
+  }
+
+  public PriorityQueue<ScheduledTask> getTasks(){
     return taskQueue;
   }
 
@@ -110,7 +124,7 @@ public class Timer {
   /**
    * Runs a {@link ScheduledTask}.
    */
-  public static void runTask() {
+  public void runTask() {
     // If there are any tasks
     if (taskQueue.size() > 0) {
       // Get the next ScheduledTask
@@ -129,7 +143,7 @@ public class Timer {
    *
    * @param task the task to be removed
    */
-  public static void removeTask(Task task) {
+  public void removeTask(Task task) {
     if (taskMap.containsKey(task)) {
       ScheduledTask scheduledTask = taskMap.get(task);
       taskQueue.remove(scheduledTask);
@@ -142,7 +156,7 @@ public class Timer {
    *
    * @return the task from the queue or null if task queue is empty.
    */
-  public static Task getTask() {
+  public Task getTask() {
     if (taskQueue.size() > 0) {
       ScheduledTask currentTask = taskQueue.peek();
       return currentTask.getTask();
@@ -156,7 +170,7 @@ public class Timer {
    *
    * @param task the task
    */
-  public static void putTask(Task task){
+  public void putTask(Task task){
     if(taskMap.containsKey(task)){
       System.err.println("Can't insert same task to the task queue multiple times");
       return;
@@ -173,7 +187,7 @@ public class Timer {
    * @param time the time in milliseconds
    */
   @SuppressWarnings("unused")
-  public static void putTaskAbsoluteTime(Task task, long time) {
+  public void putTaskAbsoluteTime(Task task, long time) {
     if(taskMap.containsKey(task)){
       System.err.println("Can't insert same task to the task queue multiple times");
       return;

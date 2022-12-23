@@ -1,4 +1,5 @@
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import simblock.block.Block;
 import simblock.node.Node;
@@ -11,21 +12,27 @@ public class TimerTest {
     private static final String ALGO  = "simblock.node.consensus.ProofOfWork";
     private static final String TABLE  = "simblock.node.routing.BitcoinCoreTable";
 
+    @Before
+    public void init() {
+        Timer.InitTimer();
+    }
+
     @Test
     public void emptyTask() {
-        Assert.assertEquals(null, Timer.getTask());
+        Assert.assertEquals(null, Timer.getSimulationTimer().getTask());
     }
 
     @Test
     public void oneTask() {
+
         Node fn = new Node(0, 1, 1, 10, TABLE,
                 ALGO, true, true);
         Node tn = new Node(1, 1, 1, 10, TABLE,
                 ALGO, true, true);
         Block b = Block.genesisBlock(fn);
         Task t = new InvMessageTask(fn, tn, b);
-        Timer.putTask(t);
-        Assert.assertEquals(1, Timer.getTasks().size());
+        Timer.getSimulationTimer().putTask(t);
+        Assert.assertEquals(1, Timer.getSimulationTimer().getTasks().size());
     }
 
     @Test
@@ -36,11 +43,11 @@ public class TimerTest {
                 ALGO, true, true);
         Block b = Block.genesisBlock(fn);
         Task t = new InvMessageTask(fn, tn, b);
-        Timer.putTask(t);
-        Timer.runTask();
+        Timer.getSimulationTimer().putTask(t);
+        Timer.getSimulationTimer().runTask();
         // Running InVMessageTask will result in RecMessageTask
-        Assert.assertEquals(1, Timer.getTasks().size());
-        Task t2 = Timer.getTask();
+        Assert.assertEquals(1, Timer.getSimulationTimer().getTasks().size());
+        Task t2 = Timer.getSimulationTimer().getTask();
         Assert.assertTrue(t2  instanceof RecMessageTask);
     }
 
@@ -52,9 +59,9 @@ public class TimerTest {
                 ALGO, true, true);
         Block b = Block.genesisBlock(fn);
         Task t = new InvMessageTask(fn, tn, b);
-        Timer.putTask(t);
-        Timer.putTask(t);
-        Assert.assertEquals(1, Timer.getTasks().size());
+        Timer.getSimulationTimer().putTask(t);
+        Timer.getSimulationTimer().putTask(t);
+        Assert.assertEquals(1, Timer.getSimulationTimer().getTasks().size());
     }
 
     @Test
@@ -64,18 +71,16 @@ public class TimerTest {
         Node tn = new Node(1, 1, 1, 10, TABLE,
                 ALGO, true, true);
         Block b = Block.genesisBlock(fn);
-        Task t1 = new InvMessageTask(fn, tn, b);
-        Timer.putTaskAbsoluteTime(t1, 10);
 
-        System.out.println(t1);
+        Task t1 = new InvMessageTask(fn, tn, b);
+        Timer.getSimulationTimer().putTaskAbsoluteTime(t1, 10);
 
         Task t2 = new InvMessageTask(fn, tn, b);
-        Timer.putTaskAbsoluteTime(t2, 5);
+        Timer.getSimulationTimer().putTaskAbsoluteTime(t2, 5);
 
-        System.out.println(t2);
         // getTask gets the first element
         // but does not remove it from the priority queue
-        Assert.assertEquals(t2, Timer.getTask());
+        Assert.assertEquals(t2, Timer.getSimulationTimer().getTask());
     }
 
 }

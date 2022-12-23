@@ -17,42 +17,18 @@
 package simblock.simulator;
 
 
-import static simblock.settings.SimulationConfiguration.ALGO;
-import static simblock.settings.SimulationConfiguration.AVERAGE_MINING_POWER;
-import static simblock.settings.SimulationConfiguration.END_BLOCK_HEIGHT;
-import static simblock.settings.SimulationConfiguration.INTERVAL;
-import static simblock.settings.SimulationConfiguration.NUM_OF_NODES;
-import static simblock.settings.SimulationConfiguration.STDEV_OF_MINING_POWER;
-import static simblock.settings.SimulationConfiguration.TABLE;
-import static simblock.settings.SimulationConfiguration.CBR_USAGE_RATE;
-import static simblock.settings.SimulationConfiguration.CHURN_NODE_RATE;
-import static simblock.simulator.Network.getDegreeDistribution;
-import static simblock.simulator.Network.getRegionDistribution;
-import static simblock.simulator.Network.printRegion;
-import static simblock.simulator.Simulator.addNode;
-import static simblock.simulator.Simulator.getSimulatedNodes;
-import static simblock.simulator.Simulator.printAllPropagation;
-import static simblock.simulator.Simulator.setTargetInterval;
-import static simblock.simulator.Timer.getCurrentTime;
-import static simblock.simulator.Timer.getTask;
-import static simblock.simulator.Timer.runTask;
-
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
 import simblock.block.Block;
 import simblock.node.Node;
 import simblock.task.AbstractMintingTask;
+
+import java.io.*;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.*;
+
+import static simblock.settings.SimulationConfiguration.*;
+import static simblock.simulator.Network.*;
+import static simblock.simulator.Simulator.*;
 
 
 /**
@@ -115,6 +91,9 @@ public class Main {
    * @param args the input arguments
    */
   public static void main(String[] args) {
+
+    Timer.InitTimer();
+
     final long start = System.currentTimeMillis();
     setTargetInterval(INTERVAL);
 
@@ -132,9 +111,9 @@ public class Main {
     int currentBlockHeight = 1;
 
     // Iterate over tasks and handle
-    while (getTask() != null) {
-      if (getTask() instanceof AbstractMintingTask) {
-        AbstractMintingTask task = (AbstractMintingTask) getTask();
+    while (Timer.getSimulationTimer().getTask() != null) {
+      if (Timer.getSimulationTimer().getTask() instanceof AbstractMintingTask) {
+        AbstractMintingTask task = (AbstractMintingTask) Timer.getSimulationTimer().getTask();
         if (task.getParent().getHeight() == currentBlockHeight) {
           currentBlockHeight++;
         }
@@ -148,7 +127,7 @@ public class Main {
         }
       }
       // Execute task
-      runTask();
+      Timer.getSimulationTimer().runTask();
     }
 
     // Print propagation information about all blocks
@@ -226,7 +205,7 @@ public class Main {
     OUT_JSON_FILE.print("{");
     OUT_JSON_FILE.print("\"kind\":\"simulation-end\",");
     OUT_JSON_FILE.print("\"content\":{");
-    OUT_JSON_FILE.print("\"timestamp\":" + getCurrentTime());
+    OUT_JSON_FILE.print("\"timestamp\":" + Timer.getSimulationTimer().getCurrentTime());
     OUT_JSON_FILE.print("}");
     OUT_JSON_FILE.print("}");
     //end json format

@@ -16,13 +16,14 @@
 
 package simblock.node.consensus;
 
-import static simblock.simulator.Main.random;
-
-import java.math.BigInteger;
 import simblock.block.Block;
 import simblock.block.ProofOfWorkBlock;
 import simblock.node.Node;
 import simblock.task.MiningTask;
+
+import java.math.BigInteger;
+
+import static simblock.simulator.Main.random;
 
 /**
  * The type Proof of work.
@@ -44,8 +45,12 @@ public class ProofOfWork extends AbstractConsensusAlgo {
   @Override
   public MiningTask minting() {
     Node selfNode = this.getSelfNode();
-    ProofOfWorkBlock parent = (ProofOfWorkBlock) selfNode.getBlock();
-    BigInteger difficulty = parent.getNextDifficulty();
+    if(selfNode==null || selfNode.getBlock()==null){
+      System.err.println("Node or block is null!");
+      return null;
+    }
+    ProofOfWorkBlock block = (ProofOfWorkBlock) selfNode.getBlock();
+    BigInteger difficulty = block.getNextDifficulty();
     double p = 1.0 / difficulty.doubleValue();
     double u = random.nextDouble();
     return p <= Math.pow(2, -53) ? null : new MiningTask(selfNode, (long) (Math.log(u) / Math.log(
