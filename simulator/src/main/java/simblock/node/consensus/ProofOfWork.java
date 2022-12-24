@@ -41,6 +41,10 @@ public class ProofOfWork extends AbstractConsensusAlgo {
     }
     ProofOfWorkBlock block = (ProofOfWorkBlock) node.getCurrentBlock();
     BigInteger difficulty = block.getNextDifficulty();
+    if(difficulty.intValue()==0){
+      System.err.println("difficulty is 0");
+      return null;
+    }
     double p = 1.0 / difficulty.doubleValue();
     double u = random.nextDouble();
     return p <= Math.pow(2, -53) ? null : new MiningTask(node, (long) (Math.log(u) / Math.log(

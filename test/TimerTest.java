@@ -12,11 +12,11 @@ import simblock.task.Task;
 public class TimerTest {
     private static final String ALGO  = "simblock.node.consensus.ProofOfWork";
     private static final String TABLE  = "simblock.node.routing.BitcoinCoreTable";
-
+    private static final long INTERVAL = 1000 * 60 * 10;
     @Before
     public void init() {
         Timer.InitTimer();
-        Simulator.InitSimulator(ALGO);
+        Simulator.InitSimulator(ALGO, INTERVAL);
     }
 
     @Test
@@ -26,11 +26,8 @@ public class TimerTest {
 
     @Test
     public void oneTask() {
-
-        Node fn = new Node(0, 1, 1, 10, TABLE,
-                ALGO, true, true);
-        Node tn = new Node(1, 1, 1, 10, TABLE,
-                ALGO, true, true);
+        Node fn = new Node(0, 1, 1, 10, TABLE, true, true);
+        Node tn = new Node(1, 1, 1, 10, TABLE, true, true);
         Block b = Block.genesisBlock(fn);
         Task t = new InvMessageTask(fn, tn, b);
         Timer.getSimulationTimer().putTask(t);
@@ -39,10 +36,8 @@ public class TimerTest {
 
     @Test
     public void runInVMessageTaskCreatesRecMessageTask() {
-        Node fn = new Node(0, 1, 1, 10, TABLE,
-                ALGO, true, true);
-        Node tn = new Node(1, 1, 1, 10, TABLE,
-                ALGO, true, true);
+        Node fn = new Node(0, 1, 1, 10, TABLE, true, true);
+        Node tn = new Node(1, 1, 1, 10, TABLE, true, true);
         Block b = Block.genesisBlock(fn);
         Task t = new InvMessageTask(fn, tn, b);
         Timer.getSimulationTimer().putTask(t);
@@ -55,10 +50,8 @@ public class TimerTest {
 
     @Test
     public void sameTask(){
-        Node fn = new Node(0, 1, 1, 10, TABLE,
-                ALGO, true, true);
-        Node tn = new Node(1, 1, 1, 10, TABLE,
-                ALGO, true, true);
+        Node fn = new Node(0, 1, 1, 10, TABLE,true, true);
+        Node tn = new Node(1, 1, 1, 10, TABLE,true, true);
         Block b = Block.genesisBlock(fn);
         Task t = new InvMessageTask(fn, tn, b);
         Timer.getSimulationTimer().putTask(t);
@@ -68,10 +61,8 @@ public class TimerTest {
 
     @Test
     public void unorderedTasks(){
-        Node fn = new Node(0, 1, 1, 10, TABLE,
-                ALGO, true, true);
-        Node tn = new Node(1, 1, 1, 10, TABLE,
-                ALGO, true, true);
+        Node fn = new Node(0, 1, 1, 10, TABLE,true, true);
+        Node tn = new Node(1, 1, 1, 10, TABLE, true, true);
         Block b = Block.genesisBlock(fn);
 
         Task t1 = new InvMessageTask(fn, tn, b);

@@ -38,7 +38,7 @@ public class Main {
   /**
    * The constant to be used as the simulation seed.
    */
-  public static Random random = new Random(10);
+  public static Random random = new Random();
 
   /**
    * The initial simulation time.
@@ -93,10 +93,9 @@ public class Main {
   public static void main(String[] args) {
 
     Timer.InitTimer();
-    Simulator.InitSimulator(ALGO);
+    Simulator.InitSimulator(ALGO, INTERVAL);
 
     final long start = System.currentTimeMillis();
-    setTargetInterval(INTERVAL);
 
     //start json format
     OUT_JSON_FILE.print("[");
@@ -322,8 +321,7 @@ public class Main {
       // Each node gets assigned a region, its degree, mining power, routing table and
       // consensus algorithm
       Node node = new Node(
-          id, degreeList.get(id - 1) + 1, regionList.get(id - 1), genMiningPower(), TABLE,
-          ALGO, useCBRNodes.get(id - 1), churnNodes.get(id - 1)
+          id, degreeList.get(id - 1) + 1, regionList.get(id - 1), genMiningPower(), TABLE, useCBRNodes.get(id - 1), churnNodes.get(id - 1)
       );
       // Add the node to the list of simulated nodes
       addNode(node);

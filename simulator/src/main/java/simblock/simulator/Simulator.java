@@ -46,9 +46,10 @@ public class Simulator {
 
   private static AbstractConsensusAlgo consensusAlgo = null;
 
-  public static void InitSimulator(String consensusAlgoStr){
+  public static void InitSimulator(String consensusAlgoStr, long interval){
     try{
       Simulator.consensusAlgo = (AbstractConsensusAlgo) Class.forName(consensusAlgoStr).getConstructor().newInstance();
+      setTargetInterval(interval);
     } catch (ClassNotFoundException e) {
       System.err.println("Class not found");
       e.printStackTrace();
@@ -58,7 +59,6 @@ public class Simulator {
     }catch (Exception e){
       e.printStackTrace();
     }
-    Simulator.consensusAlgo = consensusAlgo;
   }
 
   public static AbstractConsensusAlgo getConsensusAlgo(){

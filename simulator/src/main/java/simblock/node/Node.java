@@ -107,13 +107,11 @@ public class Node {
    * @param region            the region
    * @param miningPower       the mining power
    * @param routingTableName  the routing table name
-   * @param consensusAlgoName the consensus algorithm name
    * @param useCBR            whether the node uses compact block relay
    * @param isChurnNode       whether the node causes churn
    */
   public Node(
-      int nodeID, int numConnection, int region, long miningPower, String routingTableName,
-      String consensusAlgoName, boolean useCBR, boolean isChurnNode
+      int nodeID, int numConnection, int region, long miningPower, String routingTableName, boolean useCBR, boolean isChurnNode
   ) {
     this.nodeID = nodeID;
     this.region = region;
@@ -452,7 +450,7 @@ public class Node {
           // Send compact block message.
           messageTask = new CmpctBlockMessageTask(this, to, block, delay);
         } else {
-          // Else use lagacy protocol.
+          // Else use legacy protocol.
           long delay = BLOCK_SIZE * 8 / (bandwidth / 1000) + processingTime;
           messageTask = new BlockMessageTask(this, to, block, delay);
         }
