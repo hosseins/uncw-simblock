@@ -16,7 +16,7 @@
 
 package simblock.task;
 
-import static simblock.simulator.Timer.getCurrentTime;
+import static simblock.simulator.Timer.getClock;
 
 import java.math.BigInteger;
 import simblock.block.SamplePoSBlock;
@@ -33,7 +33,7 @@ public class SampleStakingTask extends AbstractMintingTask {
   @Override
   public void run() {
     SamplePoSBlock createdBlock = new SamplePoSBlock(
-        (SamplePoSBlock) this.getParent(), this.getMinter(), getCurrentTime(),
+        (SamplePoSBlock) this.getParent(), this.getMinter(), getClock(),
         this.difficulty
     );
     this.getMinter().receiveBlock(createdBlock);

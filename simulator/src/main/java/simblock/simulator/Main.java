@@ -127,7 +127,7 @@ public class Main {
         }
       }
       // Execute task
-      Timer.getSimulationTimer().runTask();
+      Timer.getSimulationTimer().runFirstNextTask();
     }
 
     // Print propagation information about all blocks
@@ -205,7 +205,7 @@ public class Main {
     OUT_JSON_FILE.print("{");
     OUT_JSON_FILE.print("\"kind\":\"simulation-end\",");
     OUT_JSON_FILE.print("\"content\":{");
-    OUT_JSON_FILE.print("\"timestamp\":" + Timer.getSimulationTimer().getCurrentTime());
+    OUT_JSON_FILE.print("\"timestamp\":" + Timer.getSimulationTimer().getClock());
     OUT_JSON_FILE.print("}");
     OUT_JSON_FILE.print("}");
     //end json format

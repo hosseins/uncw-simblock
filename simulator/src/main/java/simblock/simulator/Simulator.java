@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import static simblock.simulator.Timer.getCurrentTime;
+import static simblock.simulator.Timer.getClock;
 
 
 /**
@@ -158,7 +158,7 @@ public class Simulator {
           observedBlocks.indexOf(block)
       );
       // Update information for the new block
-      propagation.put(node.getNodeID(), getCurrentTime() - block.getTime());
+      propagation.put(node.getNodeID(), getClock() - block.getTime());
     } else {
       // If the block has not been seen by any node and there is no memory allocated
       //TODO move magic number to constant
@@ -170,7 +170,7 @@ public class Simulator {
       }
       // If the block has not been seen by any node and there is additional memory
       LinkedHashMap<Integer, Long> propagation = new LinkedHashMap<>();
-      propagation.put(node.getNodeID(), getCurrentTime() - block.getTime());
+      propagation.put(node.getNodeID(), getClock() - block.getTime());
       // Record the block as seen
       observedBlocks.add(block);
       // Record the propagation time

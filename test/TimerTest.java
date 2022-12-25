@@ -25,15 +25,28 @@ public class TimerTest {
     }
 
     @Test
-    public void oneTask() {
+    public void putOneTask() {
         Node fn = new Node(0, 1, 1, 10, TABLE, true, true);
         Node tn = new Node(1, 1, 1, 10, TABLE, true, true);
         Block b = Block.genesisBlock(fn);
         Task t = new InvMessageTask(fn, tn, b);
         Timer.getSimulationTimer().putTask(t);
         Assert.assertEquals(1, Timer.getSimulationTimer().getTasks().size());
+        Timer.getSimulationTimer().runFirstNextTask();
+        System.out.println(Timer.getClock());
     }
-
+    @Test
+    public void runOneTask() {
+        long clockBegins = Timer.getClock();
+        Assert.assertEquals(0, clockBegins);
+        Node fn = new Node(0, 1, 1, 10, TABLE, true, true);
+        Node tn = new Node(1, 1, 1, 10, TABLE, true, true);
+        Block b = Block.genesisBlock(fn);
+        Task t = new InvMessageTask(fn, tn, b);
+        Timer.getSimulationTimer().putTask(t);
+        Timer.getSimulationTimer().runFirstNextTask();
+        Assert.assertTrue( "Clock didn't advance" , Timer.getClock()>clockBegins);
+    }
     @Test
     public void runInVMessageTaskCreatesRecMessageTask() {
         Node fn = new Node(0, 1, 1, 10, TABLE, true, true);
@@ -41,7 +54,7 @@ public class TimerTest {
         Block b = Block.genesisBlock(fn);
         Task t = new InvMessageTask(fn, tn, b);
         Timer.getSimulationTimer().putTask(t);
-        Timer.getSimulationTimer().runTask();
+        Timer.getSimulationTimer().runFirstNextTask();
         // Running InVMessageTask will result in RecMessageTask
         Assert.assertEquals(1, Timer.getSimulationTimer().getTasks().size());
         Task t2 = Timer.getSimulationTimer().getTask();

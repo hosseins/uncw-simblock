@@ -18,7 +18,7 @@ package simblock.task;
 
 import static simblock.simulator.Main.OUT_JSON_FILE;
 import static simblock.simulator.Network.getLatency;
-import static simblock.simulator.Timer.getCurrentTime;
+import static simblock.simulator.Timer.getClock;
 
 import simblock.block.Block;
 import simblock.node.Node;
@@ -69,8 +69,8 @@ public class BlockMessageTask extends AbstractMessageTask {
     OUT_JSON_FILE.print("{");
     OUT_JSON_FILE.print("\"kind\":\"flow-block\",");
     OUT_JSON_FILE.print("\"content\":{");
-    OUT_JSON_FILE.print("\"transmission-timestamp\":" + (getCurrentTime() - this.interval) + ",");
-    OUT_JSON_FILE.print("\"reception-timestamp\":" + getCurrentTime() + ",");
+    OUT_JSON_FILE.print("\"transmission-timestamp\":" + (getClock() - this.interval) + ",");
+    OUT_JSON_FILE.print("\"reception-timestamp\":" + getClock() + ",");
     OUT_JSON_FILE.print("\"begin-node-id\":" + getFrom().getNodeID() + ",");
     OUT_JSON_FILE.print("\"end-node-id\":" + getTo().getNodeID() + ",");
     OUT_JSON_FILE.print("\"block-id\":" + block.getId());

@@ -1,7 +1,6 @@
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import simblock.block.ProofOfWorkBlock;
 import simblock.node.Node;
 import simblock.node.consensus.ProofOfWork;
 import simblock.simulator.Simulator;
@@ -32,12 +31,22 @@ public class ProofOfWorkTest {
     public void ProofOfWorkWithBlockTask() {
         Node fn = new Node(0, 1, 1, 10, TABLE, true, true);
         Simulator.addNode(fn);
+        fn.minting();
         fn.genesisBlock();
         ProofOfWork pow = new ProofOfWork();
         MiningTask mt = pow.CreateMintingTask(fn);
         Assert.assertNotEquals(null, mt);
+    }
+    /*@Test
+    public void ProofOfWorkWithBlockTask2() {
+        Node fn = new Node(0, 1, 1, 10, TABLE, true, true);
+        Simulator.addNode(fn);
+        fn.minting();
+        MiningTask mt = (MiningTask)fn.getMintingTask();
+        Assert.assertNotEquals(null, mt);
         System.out.println(mt.getInterval());
         System.out.println(fn.getMiningPower());
         System.out.println(((ProofOfWorkBlock)fn.getCurrentBlock()).getNextDifficulty());
-    }
+    }*/
+
 }

@@ -77,6 +77,10 @@ public class Node {
    */
   private final Set<Block> orphans = new HashSet<>();
 
+  public AbstractMintingTask getMintingTask() {
+    return mintingTask;
+  }
+
   /**
    * The current minting task
    */
@@ -276,7 +280,7 @@ public class Node {
     OUT_JSON_FILE.print("{");
     OUT_JSON_FILE.print("\"kind\":\"add-block\",");
     OUT_JSON_FILE.print("\"content\":{");
-    OUT_JSON_FILE.print("\"timestamp\":" + getCurrentTime() + ",");
+    OUT_JSON_FILE.print("\"timestamp\":" + getClock() + ",");
     OUT_JSON_FILE.print("\"node-id\":" + this.getNodeID() + ",");
     OUT_JSON_FILE.print("\"block-id\":" + newBlock.getId());
     OUT_JSON_FILE.print("}");
