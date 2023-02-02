@@ -16,11 +16,12 @@
 
 package simblock.node.routing;
 
-import java.util.ArrayList;
 import simblock.node.Node;
 
+import java.util.ArrayList;
+
 /**
- * An abstraction of the a routing table used by a {@link Node}.
+ * An abstraction of the routing table used by a {@link Node}.
  */
 public abstract class AbstractRoutingTable {
   private final Node selfNode;

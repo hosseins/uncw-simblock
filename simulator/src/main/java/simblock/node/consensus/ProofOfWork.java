@@ -16,13 +16,14 @@
 
 package simblock.node.consensus;
 
-import static simblock.simulator.Main.random;
-
-import java.math.BigInteger;
 import simblock.block.Block;
 import simblock.block.ProofOfWorkBlock;
 import simblock.node.Node;
 import simblock.task.MiningTask;
+
+import java.math.BigInteger;
+
+import static simblock.simulator.Main.random;
 
 /**
  * The type Proof of work.
@@ -30,26 +31,24 @@ import simblock.task.MiningTask;
 @SuppressWarnings("unused")
 public class ProofOfWork extends AbstractConsensusAlgo {
   /**
-   * Instantiates a new Proof of work consensus algorithm.
-   *
-   * @param selfNode the self node
-   */
-  public ProofOfWork(Node selfNode) {
-    super(selfNode);
-  }
-
-  /**
    * Mints a new block by simulating Proof of Work.
    */
   @Override
-  public MiningTask minting() {
-    Node selfNode = this.getSelfNode();
-    ProofOfWorkBlock parent = (ProofOfWorkBlock) selfNode.getBlock();
-    BigInteger difficulty = parent.getNextDifficulty();
+  public MiningTask CreateMintingTask(Node node) {
+    if(node==null || node.getCurrentBlock()==null){
+      System.err.println("Node or block is null!");
+      return null;
+    }
+    ProofOfWorkBlock block = (ProofOfWorkBlock) node.getCurrentBlock();
+    BigInteger difficulty = block.getNextDifficulty();
+    if(difficulty.intValue()==0){
+      System.err.println("difficulty is 0");
+      return null;
+    }
     double p = 1.0 / difficulty.doubleValue();
     double u = random.nextDouble();
-    return p <= Math.pow(2, -53) ? null : new MiningTask(selfNode, (long) (Math.log(u) / Math.log(
-        1.0 - p) / selfNode.getMiningPower()), difficulty);
+    return p <= Math.pow(2, -53) ? null : new MiningTask(node, (long) (Math.log(u) / Math.log(
+        1.0 - p) / node.getMiningPower()), difficulty);
   }
 
   /**
@@ -84,8 +83,8 @@ public class ProofOfWork extends AbstractConsensusAlgo {
   }
 
   @Override
-  public ProofOfWorkBlock genesisBlock() {
-    return ProofOfWorkBlock.genesisBlock(this.getSelfNode());
+  public ProofOfWorkBlock genesisBlock(Node node) {
+    return ProofOfWorkBlock.genesisBlock(node);
   }
 
 }

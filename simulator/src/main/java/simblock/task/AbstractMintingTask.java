@@ -44,7 +44,7 @@ public abstract class AbstractMintingTask implements Task {
    * @param interval the interval in milliseconds
    */
   public AbstractMintingTask(Node minter, long interval) {
-    this.parent = minter.getBlock();
+    this.parent = minter.getCurrentBlock();
     this.minter = minter;
     this.interval = interval;
   }

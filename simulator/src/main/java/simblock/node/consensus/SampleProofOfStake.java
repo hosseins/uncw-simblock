@@ -16,36 +16,29 @@
 
 package simblock.node.consensus;
 
-import static simblock.simulator.Main.random;
-
-import java.math.BigInteger;
 import simblock.block.Block;
 import simblock.block.SamplePoSBlock;
 import simblock.node.Node;
 import simblock.task.SampleStakingTask;
+
+import java.math.BigInteger;
+
+import static simblock.simulator.Main.random;
 
 /**
  * The type Sample proof of stake.
  */
 @SuppressWarnings("unused")
 public class SampleProofOfStake extends AbstractConsensusAlgo {
-  /**
-   * Instantiates a new Sample proof of stake.
-   *
-   * @param selfNode the self node
-   */
-  public SampleProofOfStake(Node selfNode) {
-    super(selfNode);
-  }
 
   @Override
-  public SampleStakingTask minting() {
-    Node selfNode = this.getSelfNode();
-    SamplePoSBlock parent = (SamplePoSBlock) selfNode.getBlock();
+  public SampleStakingTask CreateMintingTask(Node node) {
+    //Node selfNode = this.getSelfNode();
+    SamplePoSBlock parent = (SamplePoSBlock) node.getCurrentBlock();
     BigInteger difficulty = parent.getNextDifficulty();
-    double p = parent.getCoinage(selfNode).getCoinage().doubleValue() / difficulty.doubleValue();
+    double p = parent.getCoinage(node).getCoinage().doubleValue() / difficulty.doubleValue();
     double u = random.nextDouble();
-    return p <= Math.pow(2, -53) ? null : new SampleStakingTask(selfNode,
+    return p <= Math.pow(2, -53) ? null : new SampleStakingTask(node,
                                                                 (long) (Math.log(u) / Math.log(
                                                                     1.0 - p) * 1000), difficulty
     );
@@ -74,7 +67,7 @@ public class SampleProofOfStake extends AbstractConsensusAlgo {
   }
 
   @Override
-  public SamplePoSBlock genesisBlock() {
-    return SamplePoSBlock.genesisBlock(this.getSelfNode());
+  public SamplePoSBlock genesisBlock(Node node) {
+    return SamplePoSBlock.genesisBlock(node);
   }
 }

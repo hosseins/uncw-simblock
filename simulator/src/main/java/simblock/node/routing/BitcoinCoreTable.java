@@ -18,7 +18,7 @@ package simblock.node.routing;
 
 import static simblock.simulator.Main.OUT_JSON_FILE;
 import static simblock.simulator.Simulator.getSimulatedNodes;
-import static simblock.simulator.Timer.getCurrentTime;
+import static simblock.simulator.Timer.getClock;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -156,7 +156,7 @@ public class BitcoinCoreTable extends AbstractRoutingTable {
     OUT_JSON_FILE.print("{");
     OUT_JSON_FILE.print("\"kind\":\"add-link\",");
     OUT_JSON_FILE.print("\"content\":{");
-    OUT_JSON_FILE.print("\"timestamp\":" + getCurrentTime() + ",");
+    OUT_JSON_FILE.print("\"timestamp\":" + getClock() + ",");
     OUT_JSON_FILE.print("\"begin-node-id\":" + getSelfNode().getNodeID() + ",");
     OUT_JSON_FILE.print("\"end-node-id\":" + endNode.getNodeID());
     OUT_JSON_FILE.print("}");
@@ -169,7 +169,7 @@ public class BitcoinCoreTable extends AbstractRoutingTable {
     OUT_JSON_FILE.print("{");
     OUT_JSON_FILE.print("\"kind\":\"remove-link\",");
     OUT_JSON_FILE.print("\"content\":{");
-    OUT_JSON_FILE.print("\"timestamp\":" + getCurrentTime() + ",");
+    OUT_JSON_FILE.print("\"timestamp\":" + getClock() + ",");
     OUT_JSON_FILE.print("\"begin-node-id\":" + getSelfNode().getNodeID() + ",");
     OUT_JSON_FILE.print("\"end-node-id\":" + endNode.getNodeID());
     OUT_JSON_FILE.print("}");

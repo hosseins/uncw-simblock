@@ -16,13 +16,15 @@
 
 package simblock.simulator;
 
-import static simblock.simulator.Timer.getCurrentTime;
+import simblock.block.Block;
+import simblock.node.Node;
+import simblock.node.consensus.AbstractConsensusAlgo;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import simblock.block.Block;
-import simblock.node.Node;
+
+import static simblock.simulator.Timer.getClock;
 
 
 /**
@@ -40,6 +42,28 @@ public class Simulator {
    * The target block interval in milliseconds.
    */
   private static long targetInterval;
+
+
+  private static AbstractConsensusAlgo consensusAlgo = null;
+
+  public static void InitSimulator(String consensusAlgoStr, long interval){
+    try{
+      Simulator.consensusAlgo = (AbstractConsensusAlgo) Class.forName(consensusAlgoStr).getConstructor().newInstance();
+      setTargetInterval(interval);
+    } catch (ClassNotFoundException e) {
+      System.err.println("Class not found");
+      e.printStackTrace();
+    }catch (NoSuchMethodException e) {
+      System.err.println("Method not found");
+      e.printStackTrace();
+    }catch (Exception e){
+      e.printStackTrace();
+    }
+  }
+
+  public static AbstractConsensusAlgo getConsensusAlgo(){
+    return Simulator.consensusAlgo;
+  }
 
   /**
    * Get simulated nodes list.
@@ -134,7 +158,7 @@ public class Simulator {
           observedBlocks.indexOf(block)
       );
       // Update information for the new block
-      propagation.put(node.getNodeID(), getCurrentTime() - block.getTime());
+      propagation.put(node.getNodeID(), getClock() - block.getTime());
     } else {
       // If the block has not been seen by any node and there is no memory allocated
       //TODO move magic number to constant
@@ -146,7 +170,7 @@ public class Simulator {
       }
       // If the block has not been seen by any node and there is additional memory
       LinkedHashMap<Integer, Long> propagation = new LinkedHashMap<>();
-      propagation.put(node.getNodeID(), getCurrentTime() - block.getTime());
+      propagation.put(node.getNodeID(), getClock() - block.getTime());
       // Record the block as seen
       observedBlocks.add(block);
       // Record the propagation time

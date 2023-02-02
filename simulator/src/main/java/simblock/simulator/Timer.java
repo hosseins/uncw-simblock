@@ -33,9 +33,23 @@ public class Timer {
   /**
    * A sorted queue of scheduled tasks.
    */
-  private static final PriorityQueue<ScheduledTask> taskQueue = new PriorityQueue<>();
+  private final PriorityQueue<ScheduledTask> taskQueue = new PriorityQueue<>();
+  public static Timer SimulationTimer = null;
 
-  public static PriorityQueue<ScheduledTask> getTasks(){
+  public static void InitTimer() {
+    SimulationTimer = new Timer();
+  }
+
+  public static Timer getSimulationTimer()
+  {
+    if(SimulationTimer==null)
+    {
+      throw new NullPointerException("simulation timer singleton is not initialized");
+    }
+    return SimulationTimer;
+  }
+
+  public PriorityQueue<ScheduledTask> getTasks(){
     return taskQueue;
   }
 
@@ -47,10 +61,10 @@ public class Timer {
   //TODO a bit redundant since Task is again stored in ScheduledTask. Is there a better approach?
   private static final Map<Task, ScheduledTask> taskMap = new HashMap<>();
   /**
-   * Initial simulation time in milliseconds.
+   * Simulation time in milliseconds. This is NOT wall clock.
    */
   //TODO is it milliseconds?
-  private static long currentTime = 0L;
+  private static long clock = 0L;
 
   /**
    * Represents a {@link Task} that is scheduled to be executed.
@@ -107,16 +121,29 @@ public class Timer {
     }
   }
 
+  private static void updateClock(long newTime){
+    Timer.clock = newTime;
+  }
+
+  /**
+   * Get current time in milliseconds.
+   *
+   * @return the time
+   */
+  public static long getClock() {
+    return clock;
+  }
+
   /**
    * Runs a {@link ScheduledTask}.
    */
-  public static void runTask() {
+  public void runFirstNextTask() {
     // If there are any tasks
     if (taskQueue.size() > 0) {
       // Get the next ScheduledTask
       ScheduledTask currentScheduledTask = taskQueue.poll();
       Task currentTask = currentScheduledTask.getTask();
-      currentTime = currentScheduledTask.getScheduledTime();
+      Timer.updateClock(currentScheduledTask.getScheduledTime());
       // Remove the task from the mapping of all tasks
       taskMap.remove(currentTask, currentScheduledTask);
       // Execute
@@ -129,7 +156,7 @@ public class Timer {
    *
    * @param task the task to be removed
    */
-  public static void removeTask(Task task) {
+  public void removeTask(Task task) {
     if (taskMap.containsKey(task)) {
       ScheduledTask scheduledTask = taskMap.get(task);
       taskQueue.remove(scheduledTask);
@@ -142,7 +169,7 @@ public class Timer {
    *
    * @return the task from the queue or null if task queue is empty.
    */
-  public static Task getTask() {
+  public Task getTask() {
     if (taskQueue.size() > 0) {
       ScheduledTask currentTask = taskQueue.peek();
       return currentTask.getTask();
@@ -156,12 +183,12 @@ public class Timer {
    *
    * @param task the task
    */
-  public static void putTask(Task task){
+  public void putTask(Task task){
     if(taskMap.containsKey(task)){
       System.err.println("Can't insert same task to the task queue multiple times");
       return;
     }
-    ScheduledTask scheduledTask = new ScheduledTask(task, currentTime + task.getInterval());
+    ScheduledTask scheduledTask = new ScheduledTask(task, clock + task.getInterval());
     taskMap.put(task, scheduledTask);
     taskQueue.add(scheduledTask);
   }
@@ -173,18 +200,15 @@ public class Timer {
    * @param time the time in milliseconds
    */
   @SuppressWarnings("unused")
-  public static void putTaskAbsoluteTime(Task task, long time) {
+  public void putTaskAbsoluteTime(Task task, long time) {
+    if(taskMap.containsKey(task)){
+      System.err.println("Can't insert same task to the task queue multiple times");
+      return;
+    }
     ScheduledTask scheduledTask = new ScheduledTask(task, time);
     taskMap.put(task, scheduledTask);
     taskQueue.add(scheduledTask);
   }
 
-  /**
-   * Get current time in milliseconds.
-   *
-   * @return the time
-   */
-  public static long getCurrentTime() {
-    return currentTime;
-  }
+
 }

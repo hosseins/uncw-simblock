@@ -16,7 +16,7 @@
 
 package simblock.task;
 
-import static simblock.simulator.Timer.getCurrentTime;
+import static simblock.simulator.Timer.getClock;
 
 import java.math.BigInteger;
 import simblock.block.ProofOfWorkBlock;
@@ -44,7 +44,7 @@ public class MiningTask extends AbstractMintingTask {
   @Override
   public void run() {
     ProofOfWorkBlock createdBlock = new ProofOfWorkBlock(
-        (ProofOfWorkBlock) this.getParent(), this.getMinter(), getCurrentTime(),
+        (ProofOfWorkBlock) this.getParent(), this.getMinter(), getClock(),
         this.difficulty
     );
     this.getMinter().receiveBlock(createdBlock);

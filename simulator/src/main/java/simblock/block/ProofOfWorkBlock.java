@@ -16,11 +16,12 @@
 
 package simblock.block;
 
-import static simblock.simulator.Simulator.getSimulatedNodes;
-import static simblock.simulator.Simulator.getTargetInterval;
+import simblock.node.Node;
 
 import java.math.BigInteger;
-import simblock.node.Node;
+
+import static simblock.simulator.Simulator.getSimulatedNodes;
+import static simblock.simulator.Simulator.getTargetInterval;
 
 
 /**
