@@ -131,7 +131,7 @@ public class Simulator {
    * A list of observed {@link Block} instances.
    */
   private static final ArrayList<Block> observedBlocks = new ArrayList<>();
-
+  public static int getObservedBlocksSize() { return observedBlocks.size(); }
   /**
    * A list of observed block propagation times. The map key represents the id of the node that
    * has seen the
