@@ -69,7 +69,7 @@ public class Timer {
   /**
    * Represents a {@link Task} that is scheduled to be executed.
    */
-  private static class ScheduledTask implements Comparable<ScheduledTask> {
+  public static class ScheduledTask implements Comparable<ScheduledTask> {
     private final Task task;
     private final long scheduledTime;
 

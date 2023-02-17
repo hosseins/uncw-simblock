@@ -47,4 +47,14 @@ public class SimulatorTest {
         node2.receiveBlock(newBlock);
         Assert.assertEquals(1, Simulator.getObservedBlocksSize());
     }
+
+    @Test
+    public void AddNodeWithConnection() {
+        Node node1 = new Node(0, 1, 1, 5, TABLE, true, true);
+        Node node2 = new (1, 1, 1, 5, TABLE, true, true);
+        Simulator.addNode(node1);
+        Simulator.addNodeWithConnection(node2);
+
+        Assert.assertEquals(node1.getNeighbors[0], node2);
+    }
 }

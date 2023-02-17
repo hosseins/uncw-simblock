@@ -89,4 +89,21 @@ public class TimerTest {
         Assert.assertEquals(t2, Timer.getSimulationTimer().getTask());
     }
 
+    @Test
+    public void testScheduledTaskComparison() {
+        Node fn = new Node(0, 1, 1, 10, TABLE,true, true);
+        Node tn = new Node(1, 1, 1, 10, TABLE, true, true);
+        Block b = Block.genesisBlock(fn);
+
+        Task t1 = new InvMessageTask(fn, tn, b);
+        Timer.ScheduledTask scheduledt1 = new Timer.ScheduledTask(t1, 10);
+
+        Task t2 = new InvMessageTask(fn, tn, b);
+        Timer.ScheduledTask scheduledt2 = new Timer.ScheduledTask(t2, 5);
+
+        Assert.assertEquals(0, scheduledt1.compareTo(scheduledt1));
+        Assert.assertEquals(1, scheduledt1.compareTo(scheduledt2));
+        Assert.assertEquals(-1, scheduledt2.compareTo(scheduledt1))
+    }
+
 }
