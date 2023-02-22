@@ -48,7 +48,7 @@ public class Simulator {
 
   private static int nextNodeIdx = 0;
 
-  public static Node getNextNode(){ return simulatedNodes.get(nextNodeIdx++);}
+  public static Node getNextNode(){ return simulatedNodes.get(nextNodeIdx++ % simulatedNodes.size());}
 
   public static void InitSimulator(String consensusAlgoStr, long interval){
     try{

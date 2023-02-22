@@ -354,9 +354,10 @@ public class Node {
       // current block
       this.addOrphans(block, this.currentBlock);
       arriveBlock(block, this);
-      Simulator.getNextNode().minting();
 
     }
+    Simulator.getNextNode().minting();
+
   }
 
   /**
