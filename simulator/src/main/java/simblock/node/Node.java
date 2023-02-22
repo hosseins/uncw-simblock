@@ -346,7 +346,7 @@ public class Node {
       // Else add to canonical chain
       this.addToChain(block);
       // Generates a new minting task
-      this.minting();
+      Simulator.getNextNode().minting();
       // Advertise received block
       this.sendInv(block);
     } else if (!this.orphans.contains(block) && !block.isOnSameChainAs(this.currentBlock)) {

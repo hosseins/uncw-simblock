@@ -46,6 +46,10 @@ public class Simulator {
 
   private static AbstractConsensusAlgo consensusAlgo = null;
 
+  private static int nextNodeIdx = 0;
+
+  public static Node getNextNode(){ return simulatedNodes.get(nextNodeIdx++);}
+
   public static void InitSimulator(String consensusAlgoStr, long interval){
     try{
       Simulator.consensusAlgo = (AbstractConsensusAlgo) Class.forName(consensusAlgoStr).getConstructor().newInstance();
@@ -56,7 +60,7 @@ public class Simulator {
     }catch (NoSuchMethodException e) {
       System.err.println("Method not found");
       e.printStackTrace();
-    }catch (Exception e){
+    }catch (Exception e) {
       e.printStackTrace();
     }
   }
