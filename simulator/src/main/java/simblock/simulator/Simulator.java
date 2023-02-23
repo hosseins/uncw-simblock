@@ -37,7 +37,7 @@ public class Simulator {
    * A list of nodes that will be used in a simulation.
    */
   private static final ArrayList<Node> simulatedNodes = new ArrayList<>();
-
+  private static final ArrayList<Node> readyNodes = new ArrayList<>();
   /**
    * The target block interval in milliseconds.
    */
@@ -48,7 +48,15 @@ public class Simulator {
 
   private static int nextNodeIdx = 0;
 
-  public static Node getNextNode(){ return simulatedNodes.get(nextNodeIdx++ % simulatedNodes.size());}
+  public static Node getNextNode(){
+    // the size of readyNodes will changes as new nodes receive blocks and are marked ready
+    // if we just call .get(nextNodeIdx % size) as opposed to explicitly resetting the value, we could see unexpected behavior
+    if (nextNodeIdx >= readyNodes.size()){
+      nextNodeIdx %= readyNodes.size();
+    }
+    return readyNodes.get(nextNodeIdx++);
+  }
+  public static void addNodeToReady(Node node){ if(!readyNodes.contains(node)){ readyNodes.add(node);}}
 
   public static void InitSimulator(String consensusAlgoStr, long interval){
     try{

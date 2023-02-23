@@ -345,6 +345,7 @@ public class Node {
       }
       // Else add to canonical chain
       this.addToChain(block);
+      Simulator.addNodeToReady(this);
       // Generates a new minting task
       // Advertise received block
       this.sendInv(block);
