@@ -18,7 +18,6 @@ package simblock.node;
 
 import simblock.block.Block;
 import simblock.node.routing.AbstractRoutingTable;
-import simblock.node.consensus.ProofOfSpace;
 import simblock.simulator.Simulator;
 import simblock.simulator.Timer;
 import simblock.task.*;
