@@ -18,6 +18,7 @@ package simblock.node;
 
 import simblock.block.Block;
 import simblock.node.routing.AbstractRoutingTable;
+import simblock.node.consensus.ProofOfSpace;
 import simblock.simulator.Simulator;
 import simblock.simulator.Timer;
 import simblock.task.*;
@@ -77,9 +78,16 @@ public class Node {
    */
   private final Set<Block> orphans = new HashSet<>();
 
+  /**
+   * Whether the node has received a block
+   */
+  private boolean ready;
+
   public AbstractMintingTask getMintingTask() {
     return mintingTask;
   }
+  
+  public void setMintingTask(AbstractMintingTask task) { this.mintingTask = task;}
 
   /**
    * The current minting task
@@ -206,6 +214,9 @@ public class Node {
     this.routingTable.setNumConnection(numConnection);
   }
 
+  public boolean isReady() { return this.ready;}
+
+  public void setReady(boolean ready ) { this.ready = ready;}
   /**
    * Gets the nodes neighbors.
    *
@@ -314,8 +325,9 @@ public class Node {
    */
   public void minting() {
     AbstractMintingTask task = Simulator.getConsensusAlgo().CreateMintingTask(this);
-    this.mintingTask = task;
+
     if (task != null) {
+      task.getMinter().setMintingTask(task);
       Timer.getSimulationTimer().putTask(task);
     }
   }
@@ -345,8 +357,9 @@ public class Node {
       }
       // Else add to canonical chain
       this.addToChain(block);
-      Simulator.addNodeToReady(this);
+      this.setReady(true);
       // Generates a new minting task
+      this.minting();
       // Advertise received block
       this.sendInv(block);
     } else if (!this.orphans.contains(block) && !block.isOnSameChainAs(this.currentBlock)) {
@@ -357,8 +370,6 @@ public class Node {
       arriveBlock(block, this);
 
     }
-    Simulator.getNextNode().minting();
-
   }
 
   /**
