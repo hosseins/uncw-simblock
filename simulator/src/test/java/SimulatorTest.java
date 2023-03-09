@@ -51,10 +51,10 @@ public class SimulatorTest {
     @Test
     public void AddNodeWithConnection() {
         Node node1 = new Node(0, 1, 1, 5, TABLE, true, true);
-        Node node2 = new (1, 1, 1, 5, TABLE, true, true);
+        Node node2 = new Node(1, 1, 1, 5, TABLE, true, true);
         Simulator.addNode(node1);
         Simulator.addNodeWithConnection(node2);
 
-        Assert.assertEquals(node1.getNeighbors[0], node2);
+        Assert.assertEquals(node1.getNeighbors().get(0), node2);
     }
 }

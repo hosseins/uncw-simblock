@@ -79,7 +79,7 @@ public class Timer {
      * @param task          - the task to be executed
      * @param scheduledTime - the simulation time at which the task is to be executed
      */
-    private ScheduledTask(Task task, long scheduledTime) {
+    public ScheduledTask(Task task, long scheduledTime) {
       this.task = task;
       this.scheduledTime = scheduledTime;
     }

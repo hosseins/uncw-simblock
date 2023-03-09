@@ -4,6 +4,7 @@ import org.junit.Test;
 import simblock.block.Block;
 import simblock.node.Node;
 import simblock.node.consensus.ProofOfWork;
+import simblock.node.routing.BitcoinCoreTable;
 import simblock.simulator.Simulator;
 import simblock.simulator.Timer;
 
@@ -25,7 +26,7 @@ public class NodeTest {
         Assert.assertEquals(0, baseNode.getNodeID());
         Assert.assertEquals(1, baseNode.getRegion());
         Assert.assertEquals(10, baseNode.getMiningPower());
-        Assert.assertTrue(baseNode.getRoutingTable instanceof BitcoinCoreTable);
+        Assert.assertTrue(baseNode.getRoutingTable() instanceof BitcoinCoreTable);
     }
 
     @Test

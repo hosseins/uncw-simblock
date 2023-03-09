@@ -103,7 +103,7 @@ public class TimerTest {
 
         Assert.assertEquals(0, scheduledt1.compareTo(scheduledt1));
         Assert.assertEquals(1, scheduledt1.compareTo(scheduledt2));
-        Assert.assertEquals(-1, scheduledt2.compareTo(scheduledt1))
+        Assert.assertEquals(-1, scheduledt2.compareTo(scheduledt1));
     }
 
 }
