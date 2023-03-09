@@ -16,6 +16,15 @@ subprojects {
 
     applicationDefaultJvmArgs = ["-Dfile.encoding=UTF-8"]
 
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        testImplementation "junit:junit:4.13"
+        testImplementation "org.assertj:assertj-core:3.15.0"
+    }
+
     idea.module {
         sourceDirs += file(srcDir)
         outputDir = file(outDir)
@@ -74,6 +83,7 @@ allprojects {
 }
 
 project(':simulator') {
+
     mainClassName = 'simblock.simulator.Main'
 
     def distSettings = {
