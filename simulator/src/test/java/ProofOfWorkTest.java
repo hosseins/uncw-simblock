@@ -41,7 +41,7 @@ public class ProofOfWorkTest {
     public void init() {
         Timer.InitTimer();
         Simulator.InitSimulator(ALGO, INTERVAL);
-        setupOutputFiles();
+
     }
 
     @Test
