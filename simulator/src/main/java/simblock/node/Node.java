@@ -266,7 +266,7 @@ public class Node {
     }
     // Update the current block
     this.currentBlock = newBlock;
-    //printAddBlock(newBlock);
+    printAddBlock(newBlock);
     // Observe and handle new block arrival
     arriveBlock(newBlock, this);
   }

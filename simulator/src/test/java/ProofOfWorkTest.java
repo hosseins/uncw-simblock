@@ -19,10 +19,10 @@ public class ProofOfWorkTest {
     private static final long INTERVAL = 1000 * 60 * 10;
 
     public void setupOutputFiles(){
-        ClassLoader classLoader = getClass().getClassLoader();
+        ClassLoader classLoader = this.getClass().getClassLoader();
         try {
-            Main.CONF_FILE_URI = classLoader.getResource("C:\\Users\\Brie\\Codes\\uncw-simblock\\simulator\\src\\dist\\conf\\simulator.conf").toURI();
-            Main.OUT_FILE_URI = Main.CONF_FILE_URI.resolve(new URI("../output/"));
+            Main.CONF_FILE_URI = classLoader.getResource("simulator.conf").toURI();
+            Main.OUT_FILE_URI = Main.CONF_FILE_URI.resolve(new URI("output"));
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
@@ -41,7 +41,7 @@ public class ProofOfWorkTest {
     public void init() {
         Timer.InitTimer();
         Simulator.InitSimulator(ALGO, INTERVAL);
-
+        setupOutputFiles();
     }
 
     @Test
@@ -54,7 +54,6 @@ public class ProofOfWorkTest {
     }
     @Test
     public void ProofOfWorkWithBlockTask() {
-        System.out.println("START TEST ____________________");
         Node fn = new Node(0, 1, 1, 10, TABLE, true, true);
         Simulator.addNode(fn);
         fn.minting();
@@ -62,8 +61,6 @@ public class ProofOfWorkTest {
         ProofOfWork pow = new ProofOfWork();
         MiningTask mt = pow.CreateMintingTask(fn);
         Assert.assertNotEquals(null, mt);
-        System.out.println("END TEST ____________________");
-
     }
     /*@Test
     public void ProofOfWorkWithBlockTask2() {
