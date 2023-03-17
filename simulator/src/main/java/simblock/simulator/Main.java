@@ -53,15 +53,6 @@ public class Main {
    */
   public static URI OUT_FILE_URI;
 
-  static {
-    try {
-      CONF_FILE_URI = ClassLoader.getSystemResource("simulator.conf").toURI();
-      OUT_FILE_URI = CONF_FILE_URI.resolve(new URI("../output/"));
-    } catch (URISyntaxException e) {
-      e.printStackTrace();
-    }
-  }
-
   /**
    * The output writer.
    */
@@ -74,16 +65,24 @@ public class Main {
   //TODO use logger
   public static PrintWriter STATIC_JSON_FILE;
 
-  static {
+  public static void setupOutputFiles(){
+    try {
+      CONF_FILE_URI = ClassLoader.getSystemResource("simulator.conf").toURI();
+      OUT_FILE_URI = CONF_FILE_URI.resolve(new URI("../output/"));
+    } catch (URISyntaxException e) {
+      e.printStackTrace();
+    }
+
     try {
       OUT_JSON_FILE = new PrintWriter(
-          new BufferedWriter(new FileWriter(new File(OUT_FILE_URI.resolve("./output.json")))));
+              new BufferedWriter(new FileWriter(new File(OUT_FILE_URI.resolve("./output.json")))));
       STATIC_JSON_FILE = new PrintWriter(
-          new BufferedWriter(new FileWriter(new File(OUT_FILE_URI.resolve("./static.json")))));
+              new BufferedWriter(new FileWriter(new File(OUT_FILE_URI.resolve("./static.json")))));
     } catch (IOException e) {
       e.printStackTrace();
     }
   }
+
 
   /**
    * The entry point.
@@ -92,8 +91,11 @@ public class Main {
    */
   public static void main(String[] args) {
 
+
     Timer.InitTimer();
     Simulator.InitSimulator(ALGO, INTERVAL);
+
+    setupOutputFiles();
 
     final long start = System.currentTimeMillis();
 

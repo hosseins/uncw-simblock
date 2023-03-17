@@ -69,7 +69,7 @@ public class Timer {
   /**
    * Represents a {@link Task} that is scheduled to be executed.
    */
-  private static class ScheduledTask implements Comparable<ScheduledTask> {
+  public static class ScheduledTask implements Comparable<ScheduledTask> {
     private final Task task;
     private final long scheduledTime;
 
@@ -79,7 +79,7 @@ public class Timer {
      * @param task          - the task to be executed
      * @param scheduledTime - the simulation time at which the task is to be executed
      */
-    private ScheduledTask(Task task, long scheduledTime) {
+    public ScheduledTask(Task task, long scheduledTime) {
       this.task = task;
       this.scheduledTime = scheduledTime;
     }
