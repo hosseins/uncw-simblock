@@ -13,8 +13,8 @@ import static simblock.simulator.Main.random;
 
 public class ProofOfSpace extends AbstractConsensusAlgo{
 
-     @Override
-    public AbstractMintingTask CreateMintingTask(Node node){
+    @Override
+    public MiningTask CreateMintingTask(Node node){
          try {
              Node nextReadyNode = Simulator.getNextNode();
              nextReadyNode.setMintingTask(null);
