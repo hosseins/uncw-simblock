@@ -47,10 +47,15 @@ public class Simulator {
 
   private static int nextNodeIdx = 0;
 
-  public static Node getNextNode(){
+  public static Node getNextNode() throws Exception{
     Node nextNode = simulatedNodes.get(nextNodeIdx++ % simulatedNodes.size());
-    while(!nextNode.isReady()){
+    int counter = simulatedNodes.size();
+    while(!nextNode.isReady() && counter != 0){
       nextNode = simulatedNodes.get(nextNodeIdx++ % simulatedNodes.size());
+      counter--;
+    }
+    if (counter == 0){
+      throw new Exception("No nodes ready");
     }
     return nextNode;
   }

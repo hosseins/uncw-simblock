@@ -15,19 +15,26 @@ public class ProofOfSpace extends AbstractConsensusAlgo{
 
      @Override
     public AbstractMintingTask CreateMintingTask(Node node){
-         Node nextReadyNode = Simulator.getNextNode();
-         nextReadyNode.setMintingTask(null);
+         try {
+             Node nextReadyNode = Simulator.getNextNode();
+             nextReadyNode.setMintingTask(null);
 
-         ProofOfWorkBlock block = (ProofOfWorkBlock) nextReadyNode.getCurrentBlock();
-         BigInteger difficulty = block.getNextDifficulty();
-         if(difficulty.intValue()==0){
-             System.err.println("difficulty is 0");
+             ProofOfWorkBlock block = (ProofOfWorkBlock) nextReadyNode.getCurrentBlock();
+             BigInteger difficulty = block.getNextDifficulty();
+             if(difficulty.intValue()==0){
+                 System.err.println("difficulty is 0");
+                 return null;
+             }
+             double p = 1.0 / difficulty.doubleValue();
+             double u = random.nextDouble();
+             return p <= Math.pow(2, -53) ? null : new MiningTask(nextReadyNode, (long) (Math.log(u) / Math.log(
+                     1.0 - p) / nextReadyNode.getMiningPower()), difficulty);
+         }
+         catch (Exception e){
+             System.out.println("No node ready");
              return null;
          }
-         double p = 1.0 / difficulty.doubleValue();
-         double u = random.nextDouble();
-         return p <= Math.pow(2, -53) ? null : new MiningTask(nextReadyNode, (long) (Math.log(u) / Math.log(
-                 1.0 - p) / nextReadyNode.getMiningPower()), difficulty);
+
      }
 
     @Override
