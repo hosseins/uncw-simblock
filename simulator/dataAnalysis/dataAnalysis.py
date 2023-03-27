@@ -1,11 +1,12 @@
 import json
-import sys
-
+import os
 
 # returns a list of json objects
 def create_json_list(json_file_name):
-    json_file = open("../src/dist/output/" + json_file_name)
+    json_file = open(json_file_name)
     list_form = json_file.read()[1:-1].split('},')
+    json_file.close()
+
     list_of_stringified_json = [i + '}' for i in list_form[:-1]] + [list_form[-1]]
     return [json.loads(x) for x in list_of_stringified_json]
 
@@ -64,18 +65,16 @@ def get_propagation_info(json_list):
 
 
 def get_number_forks(blocklist_filename):
-    block_file = open("../src/dist/output/" + blocklist_filename)
+    block_file = open(blocklist_filename)
     num_forks = 0
     for line in block_file:
         if "Orphan" in line:
             num_forks += 1
+    block_file.close()
     return num_forks
 
 
-def main():
-    json_file_name = sys.argv[1]
-    blocklist_file_name = sys.argv[2]
-
+def analyze_run_data(json_file_name, blocklist_file_name):
     json_list = create_json_list(json_file_name)
     prop_info = get_propagation_info(json_list)
 
@@ -89,5 +88,12 @@ def main():
 
     output_file.close()
 
+
+def main():
+    json_output_files = os.listdir("jsonOutput")
+    block_output_files = os.listdir('blockOutput')
+
+    for i in range(len(json_output_files)):
+        analyze_run_data("jsonOutput/" + json_output_files[i], "blockOutput/" + block_output_files[i])
 
 main()
