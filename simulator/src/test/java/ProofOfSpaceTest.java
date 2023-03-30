@@ -1,6 +1,8 @@
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import simblock.block.Block;
+import simblock.block.ProofOfWorkBlock;
 import simblock.node.Node;
 import simblock.node.consensus.ProofOfSpace;
 import simblock.node.consensus.ProofOfWork;
@@ -10,6 +12,7 @@ import simblock.simulator.Timer;
 import simblock.task.MiningTask;
 
 import java.io.*;
+import java.math.BigInteger;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -45,7 +48,7 @@ public class ProofOfSpaceTest {
         setupOutputFiles();
     }
     @Test
-    public void ProofOfSpaceWithBlockTask() {
+    public void ProofOfSpaceWithReadyNode() {
         Node fn = new Node(0, 1, 1, 10, TABLE, true, true);
         Simulator.addNode(fn);
         fn.minting();
@@ -55,11 +58,37 @@ public class ProofOfSpaceTest {
         Assert.assertNotEquals(null, mt);
     }
     @Test
-    public void ProofOfSpaceWithoutBlockTask() {
+    public void ProofOfSpaceNoNodeReady() {
         Node fn = new Node(0, 1, 1, 10, TABLE, true, true);
         Simulator.addNode(fn);
         ProofOfSpace pos = new ProofOfSpace();
         MiningTask mt = pos.CreateMintingTask(fn);
         Assert.assertNull(mt);
+    }
+
+    @Test
+    public void ProofOfSpaceGenesisBlock() {
+        Node fn = new Node(0, 1, 1, 10, TABLE, true, true);
+        Simulator.addNode(fn);
+        ProofOfSpace pos = new ProofOfSpace();
+        ProofOfWorkBlock block = (ProofOfWorkBlock) pos.genesisBlock(fn);
+
+        Assert.assertNotNull(block);
+    }
+
+    @Test
+    public void ProofOfSpaceBlockValidation(){
+        ProofOfSpace pos = new ProofOfSpace();
+
+        // non pow block
+        Block block = new Block(null, null, 1);
+        Assert.assertFalse(pos.isReceivedBlockValid(block, null));
+
+        // lower difficult received block
+        ProofOfWorkBlock recBlock = new ProofOfWorkBlock(null, null, 1, new BigInteger("-1"));
+        ProofOfWorkBlock currBlock = new ProofOfWorkBlock(null, null, 1, new BigInteger("1"));
+        Assert.assertFalse(pos.isReceivedBlockValid(block, currBlock));
+
+
     }
 }
