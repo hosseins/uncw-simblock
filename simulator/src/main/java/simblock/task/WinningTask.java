@@ -9,7 +9,7 @@ public class WinningTask implements Task{
     public static int k = 0;
 
     public long getInterval(){
-        return 50 * (++k);
+        return 10 * (++k);
     }
 
     /**
