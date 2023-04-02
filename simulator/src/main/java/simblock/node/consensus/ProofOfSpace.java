@@ -4,8 +4,10 @@ import simblock.block.Block;
 import simblock.block.ProofOfWorkBlock;
 import simblock.node.Node;
 import simblock.simulator.Simulator;
+import simblock.simulator.Timer;
 import simblock.task.AbstractMintingTask;
 import simblock.task.MiningTask;
+import simblock.task.WinningTask;
 
 import java.math.BigInteger;
 
@@ -13,13 +15,16 @@ import static simblock.simulator.Main.random;
 
 public class ProofOfSpace extends AbstractConsensusAlgo{
 
+    public ProofOfSpace(){
+        for(int i = 1; i<=10; i++){
+            Timer.getSimulationTimer().putTask(new WinningTask());
+        }
+    }
     @Override
     public MiningTask CreateMintingTask(Node node){
          try {
-             Node nextReadyNode = Simulator.getNextNode();
-             nextReadyNode.setMintingTask(null);
 
-             ProofOfWorkBlock block = (ProofOfWorkBlock) nextReadyNode.getCurrentBlock();
+             ProofOfWorkBlock block = (ProofOfWorkBlock) node.getCurrentBlock();
              BigInteger difficulty = block.getNextDifficulty();
              if(difficulty.intValue()==0){
                  System.err.println("difficulty is 0");
@@ -27,8 +32,7 @@ public class ProofOfSpace extends AbstractConsensusAlgo{
              }
              double p = 1.0 / difficulty.doubleValue();
              double u = random.nextDouble();
-             return p <= Math.pow(2, -53) ? null : new MiningTask(nextReadyNode, (long) (Math.log(u) / Math.log(
-                     1.0 - p) / nextReadyNode.getMiningPower()), difficulty);
+             return p <= Math.pow(2, -53) ? null : new MiningTask(node, 1, difficulty);
          }
          catch (Exception e){
              System.out.println("No node ready");

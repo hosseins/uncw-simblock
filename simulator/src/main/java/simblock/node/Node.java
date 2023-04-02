@@ -324,10 +324,14 @@ public class Node {
    */
   public void minting() {
     AbstractMintingTask task = Simulator.getConsensusAlgo().CreateMintingTask(this);
+    this.mintingTask = task;
 
     if (task != null) {
-      task.getMinter().setMintingTask(task);
-      Timer.getSimulationTimer().putTask(task);
+      ready = true;
+      //Timer.getSimulationTimer().putTask(task);
+    }
+    else{
+      ready = false;
     }
   }
 
@@ -356,7 +360,6 @@ public class Node {
       }
       // Else add to canonical chain
       this.addToChain(block);
-      this.setReady(true);
       // Generates a new minting task
       this.minting();
       // Advertise received block

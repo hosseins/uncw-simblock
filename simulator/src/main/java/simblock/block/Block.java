@@ -76,7 +76,6 @@ public class Block {
   public int getHeight() {
     return this.height;
   }
-
   /**
    * Get parent block.
    *
