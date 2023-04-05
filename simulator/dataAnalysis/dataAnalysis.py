@@ -1,5 +1,6 @@
 import json
 import os
+import statistics
 
 # returns a list of json objects
 def create_json_list(json_file_name):
@@ -34,11 +35,11 @@ def get_propagation_info(json_list):
             node_id = event['content']['node-id']
 
             # if this block has been seen by a node before
-            if block_id in block_propagation.keys():
+            if block_id in block_propagation:
                 # add the new node in the list of receivers
                 block_propagation[block_id].add(node_id)
                 # the first time the block is seen by all nodes, mark the propagation end timestamp
-                if len(block_propagation[block_id]) == num_nodes and len(block_propagation_times[block_id]) < 2:
+                if len(block_propagation[block_id]) == num_nodes and len(block_propagation_times[block_id]) == 1:
                     block_propagation_times[block_id].append(event['content']['timestamp'])
             else:
                 # create the entry, we use a set because we don't want to store duplicates
@@ -50,28 +51,20 @@ def get_propagation_info(json_list):
     # and a value which is the propagation start timestamp and a propagation end timestamp
     propagation_times = [block_propagation_times[x][1] - block_propagation_times[x][0] for x in
                              block_propagation_times.keys()]
-    propagation_times.sort()
-    min_propagation_time = propagation_times[0]
-    max_propagation_time = propagation_times[-1]
-    # odd length
-    if len(propagation_times) & 1:
-        median_propagation_time = propagation_times[len(propagation_times) // 2]
-    # even length
-    else:
-        median_propagation_time = (propagation_times[len(propagation_times) // 2] + propagation_times[
-            len(propagation_times) // 2 - 1]) // 2
+    min_propagation_time = min(propagation_times)
+    max_propagation_time = max(propagation_times)
+    median_propagation_time = statistics.median(propagation_times)
 
     return min_propagation_time, max_propagation_time, median_propagation_time
 
 
 def get_number_forks(blocklist_filename):
-    block_file = open(blocklist_filename)
-    num_forks = 0
-    for line in block_file:
-        if "Orphan" in line:
-            num_forks += 1
-    block_file.close()
-    return num_forks
+    with open(blocklist_filename) as block_file:
+        num_forks = 0
+        for line in block_file:
+            if "Orphan" in line:
+                num_forks += 1
+        return num_forks
 
 
 def analyze_run_data(json_file_name, blocklist_file_name):
@@ -81,19 +74,13 @@ def analyze_run_data(json_file_name, blocklist_file_name):
     num_forks = get_number_forks(blocklist_file_name)
 
     output_filename = 'simulation_results.csv'
-    output_file = open(output_filename, 'a')
-
-    # min,median,max,num_forks
-    output_file.write("{0},{1},{2},{3}\n".format(prop_info[0], prop_info[2], prop_info[1], num_forks))
-
-    output_file.close()
+    with open(output_filename, 'a') as output_file:
+        # min,median,max,num_forks
+        output_file.write("{0},{1},{2},{3}\n".format(prop_info[0], prop_info[2], prop_info[1], num_forks))
 
 
-def main():
+if __name__ == "__main__":
     json_output_files = os.listdir("jsonOutput")
-    block_output_files = os.listdir('blockOutput')
 
     for i in range(len(json_output_files)):
-        analyze_run_data("jsonOutput/" + json_output_files[i], "blockOutput/" + block_output_files[i])
-
-main()
+        analyze_run_data(f"jsonOutput/output{i}.json", f"blockOutput/blockList{i}.json")
