@@ -18,6 +18,7 @@ package simblock.simulator;
 
 
 import simblock.block.Block;
+import simblock.node.Farmer;
 import simblock.node.Node;
 import simblock.task.AbstractMintingTask;
 
@@ -105,7 +106,8 @@ public class Main {
     printRegion();
 
     // Setup network
-    constructNetworkWithAllNodes(NUM_OF_NODES);
+    // constructNetworkWithAllNodes(NUM_OF_NODES);
+    constructNetworkWithFarmers(NUM_OF_NODES);
 
     // Initial block height, we stop at END_BLOCK_HEIGHT
     int currentBlockHeight = 1;
@@ -341,6 +343,52 @@ public class Main {
     // Link newly generated nodes
     for (Node node : getSimulatedNodes()) {
       node.joinNetwork();
+    }
+
+    // Designates a random node (nodes in list are randomized) to mint the genesis block
+    getSimulatedNodes().get(0).genesisBlock();
+  }
+
+  public static void constructNetworkWithFarmers(int numFarmers) {
+
+    // Random distribution of nodes per region
+    double[] regionDistribution = getRegionDistribution();
+    List<Integer> regionList = makeRandomListFollowDistribution(regionDistribution, false);
+
+    // Random distribution of node degrees
+    double[] degreeDistribution = getDegreeDistribution();
+    List<Integer> degreeList = makeRandomListFollowDistribution(degreeDistribution, true);
+
+    // List of nodes using compact block relay.
+    List<Boolean> useCBRNodes = makeRandomList(CBR_USAGE_RATE);
+
+    // List of churn nodes.
+    List<Boolean> churnNodes = makeRandomList(CHURN_NODE_RATE);
+
+    for (int id = 1; id <= numFarmers; id++) {
+      // Each node gets assigned a region, its degree, mining power, routing table and
+      // consensus algorithm
+      Farmer farmer = new Farmer(
+              id, degreeList.get(id - 1) + 1, regionList.get(id - 1), genMiningPower(), TABLE, useCBRNodes.get(id - 1), churnNodes.get(id - 1), chia_depth
+      );
+      // Add the node to the list of simulated nodes
+      addNode(farmer);
+
+      OUT_JSON_FILE.print("{");
+      OUT_JSON_FILE.print("\"kind\":\"add-farmer\",");
+      OUT_JSON_FILE.print("\"content\":{");
+      OUT_JSON_FILE.print("\"timestamp\":0,");
+      OUT_JSON_FILE.print("\"farmer-id\":" + id + ",");
+      OUT_JSON_FILE.print("\"region-id\":" + regionList.get(id - 1));
+      OUT_JSON_FILE.print("}");
+      OUT_JSON_FILE.print("},");
+      OUT_JSON_FILE.flush();
+
+    }
+
+    // Link newly generated nodes
+    for (Node farmer : getSimulatedNodes()) {
+      ((Farmer) farmer).joinNetwork();
     }
 
     // Designates a random node (nodes in list are randomized) to mint the genesis block

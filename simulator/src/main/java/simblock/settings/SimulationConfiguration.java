@@ -23,9 +23,7 @@ public class SimulationConfiguration {
   /**
    * The number of nodes participating in the blockchain network.
    */
-  //TODO revert
   public static final int NUM_OF_NODES = 300;//600;//800;//6000;
-  // public static final int NUM_OF_NODES = 600;//600;//800;//6000;
 
   /**
    * The kind of routing table.
@@ -35,9 +33,8 @@ public class SimulationConfiguration {
   /**
    * The consensus algorithm to be used.
    */
-  //TODO not documented in markdown
-  // TODO return to PoW
-  public static final String ALGO = "simblock.node.consensus.ProofOfWork";
+  // public static final String ALGO = "simblock.node.consensus.ProofOfWork";
+  public static final String ALGO = "simblock.node.consensus.ChiaProofOfSpace";
 
   /**
    * The expected value of block generation interval. The difficulty of mining is automatically
@@ -76,8 +73,6 @@ public class SimulationConfiguration {
   /**
    * The block height when a simulation ends.
    */
-  //TODO revert
-  //public static final int END_BLOCK_HEIGHT = 100;
   public static final int END_BLOCK_HEIGHT = 3;
 
   /**
@@ -195,4 +190,5 @@ public class SimulationConfiguration {
   };
 
   public static int chia_k = 3;
+  public static int chia_depth = 100;
 }

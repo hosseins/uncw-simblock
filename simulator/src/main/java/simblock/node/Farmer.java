@@ -5,15 +5,12 @@ import simblock.block.PoSpaceBlock;
 import simblock.simulator.Simulator;
 import simblock.simulator.Timer;
 import simblock.task.AbstractMintingTask;
-import simblock.settings.SimulationConfiguration.*;
-import java.util.ArrayList;
+
+import java.math.BigInteger;
 
 import static simblock.settings.SimulationConfiguration.chia_k;
 
 public class Farmer extends Node{
-
-    // override addToChain to match updateChain
-    // figure out how to store chain
 
     private int[] PoSpaceCount;
     private PoSpaceBlock[] Chain;
@@ -27,13 +24,29 @@ public class Farmer extends Node{
 
     @Override
     public void addToChain(Block newBlock){
-        return;
+        PoSpaceBlock parent = (PoSpaceBlock) newBlock.getParent();
+        BigInteger minQuality = ((PoSpaceBlock) newBlock).getChainQuality();
+        int idx = -1;
+
+        for(int i = 0; i < Chain.length; i++){
+            if(parent == Chain[i]) {
+                Chain[i] = (PoSpaceBlock) newBlock;
+                return;
+            }
+            if(Chain[i].getChainQuality().compareTo(minQuality) < 0){
+                idx = i;
+                minQuality = Chain[i].getChainQuality();
+            }
+        }
+        if(idx >= 0){
+            Chain[idx] = (PoSpaceBlock) newBlock;
+        }
     }
 
     @Override
     public void minting() {
         PoSpaceBlock block = (PoSpaceBlock) this.getCurrentBlock();
-        if(this.PoSpaceCount[block.getHeight() + 1] == chia_k){ return; }
+        if(block == null || this.PoSpaceCount[block.getHeight() + 1] == chia_k){ return; }
 
         this.PoSpaceCount[block.getHeight() + 1]++;
 
