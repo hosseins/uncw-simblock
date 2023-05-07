@@ -178,6 +178,9 @@ public class Node {
     return this.currentBlock;
   }
 
+  public void setCurrentBlock(Block newBlock){
+    this.currentBlock = newBlock;
+  }
   /**
    * Gets all orphans known to node.
    *
@@ -276,7 +279,7 @@ public class Node {
    *
    * @param newBlock the block to be logged
    */
-  private void printAddBlock(Block newBlock) {
+  protected void printAddBlock(Block newBlock) {
     OUT_JSON_FILE.print("{");
     OUT_JSON_FILE.print("\"kind\":\"add-block\",");
     OUT_JSON_FILE.print("\"content\":{");

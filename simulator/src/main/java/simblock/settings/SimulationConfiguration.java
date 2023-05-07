@@ -73,7 +73,7 @@ public class SimulationConfiguration {
   /**
    * The block height when a simulation ends.
    */
-  public static final int END_BLOCK_HEIGHT = 3;
+  public static final int END_BLOCK_HEIGHT = 10;
 
   /**
    * Block size. (unit: byte).
