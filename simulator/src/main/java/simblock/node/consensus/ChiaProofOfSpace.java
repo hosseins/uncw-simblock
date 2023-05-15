@@ -1,7 +1,7 @@
 package simblock.node.consensus;
 
 import simblock.block.Block;
-import simblock.block.PoSpaceBlock;
+import simblock.block.ChiaBlock;
 import simblock.block.PoSpaceFoliage;
 import simblock.block.PoSpaceTrunk;
 import simblock.node.Farmer;
@@ -19,7 +19,7 @@ public class ChiaProofOfSpace extends AbstractConsensusAlgo{
             return null;
         }
 
-        PoSpaceBlock unFinalizedBlock = this.createUnFinalizedBlock((Farmer) node);
+        ChiaBlock unFinalizedBlock = this.createUnFinalizedBlock((Farmer) node);
         long delay = 1 + (long) (Math.random() * 10);
 
         return new VDFTask(node, delay, unFinalizedBlock);
@@ -27,31 +27,32 @@ public class ChiaProofOfSpace extends AbstractConsensusAlgo{
 
     @Override
     public boolean isReceivedBlockValid(Block receivedBlock, Block currentBlock) {
+        // TODO BRENNON
         // returns true if received block is a PoSpace block that extends or replaces current block
         // will extend if it is a child of current block
         // will replace if current block is null or if currentBlock has a lower chain quality
-        return (receivedBlock instanceof PoSpaceBlock) && (
+        return (receivedBlock instanceof ChiaBlock) && (
                 (receivedBlock.getParent() == currentBlock) ||
                         (currentBlock == null) ||
-                        (((PoSpaceBlock) receivedBlock).getChainQuality().compareTo(((PoSpaceBlock) currentBlock).getChainQuality()) > 0)
+                        (((ChiaBlock) receivedBlock).getChainQuality().compareTo(((ChiaBlock) currentBlock).getChainQuality()) > 0)
                 );
     }
 
     @Override
     public Block genesisBlock(Node node) {
-        PoSpaceTrunk trunk = new PoSpaceTrunk(null, node, 0);
-        PoSpaceFoliage foliage = new PoSpaceFoliage(null, node, 0, trunk, 1);
-        return new PoSpaceBlock(null, node, 0, foliage, trunk, true, BigInteger.ONE);
+        PoSpaceTrunk trunk = new PoSpaceTrunk();
+        PoSpaceFoliage foliage = new PoSpaceFoliage(trunk, 1);
+        return new ChiaBlock(null, node, 0, foliage, trunk, true, BigInteger.ONE);
     }
 
-    private PoSpaceBlock createUnFinalizedBlock(Farmer farmer) {
-        PoSpaceBlock parent = farmer.getCurrentBlock();
+    private ChiaBlock createUnFinalizedBlock(Farmer farmer) {
+        ChiaBlock parent = farmer.getCurrentBlock();
 
         // assign a random quality
         BigInteger quality = BigInteger.valueOf((long) 1 + (int) (Math.random() * 20));
-        PoSpaceTrunk trunk = new PoSpaceTrunk(parent.getTrunkPiece(), farmer, Timer.getClock());
-        PoSpaceFoliage foliage = new PoSpaceFoliage(parent.getFoliagePiece(), farmer, Timer.getClock(), trunk, 1);
-        return new PoSpaceBlock(parent, farmer, Timer.getClock(), foliage, trunk, false, quality);
+        PoSpaceTrunk trunk = new PoSpaceTrunk();
+        PoSpaceFoliage foliage = new PoSpaceFoliage(trunk, 1);
+        return new ChiaBlock(parent, farmer, Timer.getClock(), foliage, trunk, false, quality);
 
     }
 }

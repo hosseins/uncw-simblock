@@ -4,7 +4,7 @@ import simblock.node.Node;
 
 import java.math.BigInteger;
 
-public class PoSpaceBlock extends Block{
+public class ChiaBlock extends Block{
 
     private PoSpaceFoliage foliagePiece;
     private PoSpaceTrunk trunkPiece;
@@ -17,13 +17,13 @@ public class PoSpaceBlock extends Block{
      * @param minter the minter
      * @param time   the time
      */
-    public PoSpaceBlock(Block parent, Node minter, long time, PoSpaceFoliage foliage, PoSpaceTrunk trunk, boolean finalized, BigInteger quality) {
+    public ChiaBlock(Block parent, Node minter, long time, PoSpaceFoliage foliage, PoSpaceTrunk trunk, boolean finalized, BigInteger quality) {
         super(parent, minter, time);
         this.foliagePiece = foliage;
         this.trunkPiece = trunk;
         this.finalized = finalized;
         if(this.getParent() != null){
-            chainQuality = ((PoSpaceBlock) this.getParent()).getChainQuality().add(quality);
+            chainQuality = ((ChiaBlock) this.getParent()).getChainQuality().add(quality);
         }
         else{
             chainQuality = quality;
@@ -37,5 +37,9 @@ public class PoSpaceBlock extends Block{
 
     public void setFinalized(boolean finalized) {
         this.finalized = finalized;
+    }
+
+    public boolean isFinalized() {
+        return finalized;
     }
 }

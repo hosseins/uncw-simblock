@@ -1,7 +1,7 @@
 package simblock.node;
 
 import simblock.block.Block;
-import simblock.block.PoSpaceBlock;
+import simblock.block.ChiaBlock;
 import simblock.simulator.Simulator;
 import simblock.simulator.Timer;
 import simblock.task.AbstractMintingTask;
@@ -14,19 +14,19 @@ import static simblock.simulator.Simulator.arriveBlock;
 public class Farmer extends Node{
 
     private int[] PoSpaceCount;
-    private PoSpaceBlock[] Chain;
+    private ChiaBlock[] Chain;
     public Farmer(
             int nodeID, int numConnection, int region, long miningPower, String routingTableName, boolean useCBR, boolean isChurnNode, int depth
     ) {
         super(nodeID, numConnection, region, miningPower, routingTableName, useCBR, isChurnNode);
         PoSpaceCount = new int[depth];
-        Chain = new PoSpaceBlock[chia_k];
+        Chain = new ChiaBlock[chia_k];
     }
 
 
     @Override
-    public PoSpaceBlock getCurrentBlock(){
-        return (PoSpaceBlock) super.getCurrentBlock();
+    public ChiaBlock getCurrentBlock(){
+        return (ChiaBlock) super.getCurrentBlock();
     }
     @Override
     public void addToChain(Block newBlock){
@@ -37,7 +37,7 @@ public class Farmer extends Node{
         // then we update the chain accordingly
 
 
-        BigInteger minQuality = ((PoSpaceBlock) newBlock).getChainQuality();
+        BigInteger minQuality = ((ChiaBlock) newBlock).getChainQuality();
         int idx = -1;
 
         // Note: Chain.length refers to the number of chains/branches we keep track of
@@ -65,7 +65,7 @@ public class Farmer extends Node{
 
         // if one of the conditions above are met, then we will have a valid idx
         if(idx >= 0) {
-            Chain[idx] = (PoSpaceBlock) newBlock;
+            Chain[idx] = (ChiaBlock) newBlock;
             this.setCurrentBlock(newBlock);
             printAddBlock(newBlock);
         }
@@ -76,7 +76,7 @@ public class Farmer extends Node{
 
     @Override
     public void minting() {
-        PoSpaceBlock block = this.getCurrentBlock();
+        ChiaBlock block = this.getCurrentBlock();
         if(block == null || this.PoSpaceCount[block.getHeight() + 1] == chia_k){ return; }
 
         this.PoSpaceCount[block.getHeight() + 1]++;

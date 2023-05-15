@@ -1,18 +1,18 @@
 package simblock.task;
 
-import simblock.block.PoSpaceBlock;
+import simblock.block.ChiaBlock;
 import simblock.node.Node;
 
 public class VDFTask extends AbstractMintingTask{
 
-    private PoSpaceBlock unfinalizedBlock;
+    private ChiaBlock unfinalizedBlock;
     /**
      * Instantiates a new Abstract minting task.
      *
      * @param minter   the minter
      * @param interval the interval in milliseconds
      */
-    public VDFTask(Node minter, long interval, PoSpaceBlock unfinalizedBlock) {
+    public VDFTask(Node minter, long interval, ChiaBlock unfinalizedBlock) {
         super(minter, interval);
         this.unfinalizedBlock = unfinalizedBlock;
     }
