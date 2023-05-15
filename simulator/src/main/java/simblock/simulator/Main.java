@@ -94,7 +94,7 @@ public class Main {
    */
   public static void main(String[] args) {
 
-    // specify which algorithm to use using the Algo enum located in the simulationconfiguration file
+    // specify which algorithm to use using the Algo enum located in the SimulationConfiguration file
     final Algo ALGO = Algo.CHIA;
     final String ALGO_CLASS = getAlgorithm(ALGO);
 

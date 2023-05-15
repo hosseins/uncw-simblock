@@ -7,20 +7,30 @@ import simblock.simulator.Timer;
 import simblock.task.AbstractMintingTask;
 
 import java.math.BigInteger;
+import java.util.PriorityQueue;
 
 import static simblock.settings.SimulationConfiguration.CHIA_K;
+import static simblock.settings.SimulationConfiguration.NUM_OF_NODES;
 import static simblock.simulator.Simulator.arriveBlock;
 
 public class Farmer extends Node{
-    private static final int DEPTH = 100;
+
+    // this is used to specify the size of the PoSpaceCount array and corresponds to how many levels/depths we keep track of
+    private static final int DEPTH = NUM_OF_NODES * 2;
+    // used with Paths to determine how many paths each node keeps track of
+    private static final int PATH_COUNT = CHIA_K * 2;
+
+    // how many blocks this farmer has mined at a particular level
     private int[] PoSpaceCount;
-    private ChiaBlock[] Chain;
+
+    // priority queue for keeping track of x number of paths during the simulation.
+    private PriorityQueue<ChiaBlock> Paths;
     public Farmer(
             int nodeID, int numConnection, int region, long miningPower, String routingTableName, boolean useCBR, boolean isChurnNode
     ) {
         super(nodeID, numConnection, region, miningPower, routingTableName, useCBR, isChurnNode);
         PoSpaceCount = new int[DEPTH];
-        Chain = new ChiaBlock[CHIA_K];
+        Paths = new PriorityQueue<ChiaBlock>(PATH_COUNT);
     }
 
 
@@ -37,35 +47,43 @@ public class Farmer extends Node{
         // then we update the chain accordingly
 
 
-        BigInteger minQuality = ((ChiaBlock) newBlock).getChainQuality();
+        BigInteger newQuality = ((ChiaBlock) newBlock).getChainQuality();
+        boolean replaced = false;
         int idx = -1;
 
         // Note: Chain.length refers to the number of chains/branches we keep track of
         // this is specified by the 'chia_k' parameter in the configs. Chia default is 3
-        for(int i = 0; i < Chain.length; i++){
+        ChiaBlock[] currentBlocks = Paths.toArray(new ChiaBlock[PATH_COUNT]);
+        for(int i = 0; i < PATH_COUNT; i++){
             // if the block is the child of the current branch head, extend that branch with the child
-            if(newBlock.getParent() == Chain[i]) {
-                idx = i;
+            if(newBlock.getParent() != null && newBlock.getParent().getId() == currentBlocks[i].getId()) {
+                Paths.remove(currentBlocks[i]);
+                Paths.add((ChiaBlock) newBlock);
+                replaced = true;
                 break;
             }
-            // (used only early in the simulation)
-            // if we have not yet seen three branches, add the block to the empty branch tracker
-            else if(Chain[i] == null) {
-                idx = i;
+            // if we have not yet seen the max number of paths, add the block to the empty branch tracker
+            else if(currentBlocks[i] == null) {
+                Paths.add((ChiaBlock) newBlock);
+                replaced = true;
                 break;
             }
             // if the new block belongs to a branch with a better quality than an existing branch
             // we want to remove the lowest quality, not just the first one with a
             // lower quality than the new block
-            if(Chain[i].getChainQuality().compareTo(minQuality) < 0){
+            if(currentBlocks[i].getChainQuality().compareTo(newQuality) < 0){
                 idx = i;
-                minQuality = Chain[i].getChainQuality();
+                break;
             }
         }
 
+        if(idx >= 0 && !replaced){
+            Paths.poll();
+            Paths.add((ChiaBlock) newBlock);
+            replaced = true;
+        }
         // if one of the conditions above are met, then we will have a valid idx
-        if(idx >= 0) {
-            Chain[idx] = (ChiaBlock) newBlock;
+        if(replaced) {
             this.setCurrentBlock(newBlock);
             printAddBlock(newBlock);
         }
@@ -90,10 +108,12 @@ public class Farmer extends Node{
         // TODO do we need logic to handle orphans? I'm not sure what the intent was by including that in Node.java
         // Algorithm 2 from Chia paper
         boolean validBlock = false;
-        for (int i = 0; i < Chain.length; i++) {
-            validBlock = validBlock || Simulator.getConsensusAlgo().isReceivedBlockValid(block, Chain[i]);
+
+        ChiaBlock[] currentBlocks = Paths.toArray(new ChiaBlock[PATH_COUNT]);
+        for (int i = 0; i < PATH_COUNT; i++) {
+            validBlock = validBlock || Simulator.getConsensusAlgo().isReceivedBlockValid(block, currentBlocks[i]);
         }
-        if (validBlock) {
+        if (validBlock && ((ChiaBlock) block).isFinalized()) {
             this.addToChain(block);
             this.minting();
             this.sendInv(block);

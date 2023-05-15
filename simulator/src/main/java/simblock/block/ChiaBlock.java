@@ -4,7 +4,7 @@ import simblock.node.Node;
 
 import java.math.BigInteger;
 
-public class ChiaBlock extends Block{
+public class ChiaBlock extends Block implements Comparable<ChiaBlock>{
 
     private PoSpaceFoliage foliagePiece;
     private PoSpaceTrunk trunkPiece;
@@ -41,5 +41,10 @@ public class ChiaBlock extends Block{
 
     public boolean isFinalized() {
         return finalized;
+    }
+
+    @Override
+    public int compareTo(ChiaBlock other) {
+        return this.chainQuality.compareTo(other.getChainQuality());
     }
 }
