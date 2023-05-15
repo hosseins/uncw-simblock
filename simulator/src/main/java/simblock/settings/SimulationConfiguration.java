@@ -30,11 +30,6 @@ public class SimulationConfiguration {
    */
   public static final String TABLE = "simblock.node.routing.BitcoinCoreTable";
 
-  /**
-   * The consensus algorithm to be used.
-   */
-  // public static final String ALGO = "simblock.node.consensus.ProofOfWork";
-  public static final String ALGO = "simblock.node.consensus.ChiaProofOfSpace";
 
   /**
    * The expected value of block generation interval. The difficulty of mining is automatically
@@ -189,6 +184,31 @@ public class SimulationConfiguration {
     0.87f,0.88f,0.89f,0.9f,0.91f,0.92f,0.93f,0.94f,0.95f,0.96f
   };
 
-  public static int chia_k = 3;
-  public static int chia_depth = 100;
+
+  /**
+    * parameter specifying the number of blocks an honest farmer should mine at each level
+    * when using the Chia consensus algorithm
+   */
+  public static int CHIA_K = 3;
+
+  /**
+   * The consensus algorithms available
+   */
+  public enum Algo {
+    CHIA,
+    PoW
+  }
+
+  /**
+   * returns the correct class based on the consensus algorithm specified.
+   */
+  public static String getAlgorithm(Algo algo) {
+    switch (algo) {
+      case CHIA:
+        return "simblock.node.consensus.ChiaProofOfSpace";
+      case PoW:
+        return "simblock.node.consensus.ProofOfWork";
+    }
+    return "";
+  }
 }

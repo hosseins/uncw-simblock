@@ -8,19 +8,19 @@ import simblock.task.AbstractMintingTask;
 
 import java.math.BigInteger;
 
-import static simblock.settings.SimulationConfiguration.chia_k;
+import static simblock.settings.SimulationConfiguration.CHIA_K;
 import static simblock.simulator.Simulator.arriveBlock;
 
 public class Farmer extends Node{
-
+    private static final int DEPTH = 100;
     private int[] PoSpaceCount;
     private ChiaBlock[] Chain;
     public Farmer(
-            int nodeID, int numConnection, int region, long miningPower, String routingTableName, boolean useCBR, boolean isChurnNode, int depth
+            int nodeID, int numConnection, int region, long miningPower, String routingTableName, boolean useCBR, boolean isChurnNode
     ) {
         super(nodeID, numConnection, region, miningPower, routingTableName, useCBR, isChurnNode);
-        PoSpaceCount = new int[depth];
-        Chain = new ChiaBlock[chia_k];
+        PoSpaceCount = new int[DEPTH];
+        Chain = new ChiaBlock[CHIA_K];
     }
 
 
@@ -77,7 +77,7 @@ public class Farmer extends Node{
     @Override
     public void minting() {
         ChiaBlock block = this.getCurrentBlock();
-        if(block == null || this.PoSpaceCount[block.getHeight() + 1] == chia_k){ return; }
+        if(block == null || this.PoSpaceCount[block.getHeight() + 1] == CHIA_K){ return; }
 
         this.PoSpaceCount[block.getHeight() + 1]++;
 

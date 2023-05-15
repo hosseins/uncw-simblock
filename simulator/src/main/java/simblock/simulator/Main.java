@@ -20,6 +20,7 @@ package simblock.simulator;
 import simblock.block.Block;
 import simblock.node.Farmer;
 import simblock.node.Node;
+import simblock.node.consensus.AbstractConsensusAlgo;
 import simblock.task.AbstractMintingTask;
 
 import java.io.*;
@@ -93,8 +94,12 @@ public class Main {
    */
   public static void main(String[] args) {
 
+    // specify which algorithm to use using the Algo enum located in the simulationconfiguration file
+    final Algo ALGO = Algo.CHIA;
+    final String ALGO_CLASS = getAlgorithm(ALGO);
+
     Timer.InitTimer();
-    Simulator.InitSimulator(ALGO, INTERVAL);
+    Simulator.InitSimulator(ALGO_CLASS, INTERVAL);
 
     final long start = System.currentTimeMillis();
 
@@ -106,8 +111,10 @@ public class Main {
     printRegion();
 
     // Setup network
-    // constructNetworkWithAllNodes(NUM_OF_NODES);
-    constructNetworkWithFarmers(NUM_OF_NODES);
+    String nodeType = "node";
+    if(ALGO == Algo.CHIA){ nodeType = "farmer"; }
+
+    constructNetworkWithAllNodes(NUM_OF_NODES, nodeType);
 
     // Initial block height, we stop at END_BLOCK_HEIGHT
     int currentBlockHeight = 1;
@@ -303,53 +310,7 @@ public class Main {
    *
    * @param numNodes the num nodes
    */
-  public static void constructNetworkWithAllNodes(int numNodes) {
-
-    // Random distribution of nodes per region
-    double[] regionDistribution = getRegionDistribution();
-    List<Integer> regionList = makeRandomListFollowDistribution(regionDistribution, false);
-
-    // Random distribution of node degrees
-    double[] degreeDistribution = getDegreeDistribution();
-    List<Integer> degreeList = makeRandomListFollowDistribution(degreeDistribution, true);
-
-    // List of nodes using compact block relay.
-    List<Boolean> useCBRNodes = makeRandomList(CBR_USAGE_RATE);
-
-    // List of churn nodes.
-		List<Boolean> churnNodes = makeRandomList(CHURN_NODE_RATE);
-
-    for (int id = 1; id <= numNodes; id++) {
-      // Each node gets assigned a region, its degree, mining power, routing table and
-      // consensus algorithm
-      Node node = new Node(
-          id, degreeList.get(id - 1) + 1, regionList.get(id - 1), genMiningPower(), TABLE, useCBRNodes.get(id - 1), churnNodes.get(id - 1)
-      );
-      // Add the node to the list of simulated nodes
-      addNode(node);
-
-      OUT_JSON_FILE.print("{");
-      OUT_JSON_FILE.print("\"kind\":\"add-node\",");
-      OUT_JSON_FILE.print("\"content\":{");
-      OUT_JSON_FILE.print("\"timestamp\":0,");
-      OUT_JSON_FILE.print("\"node-id\":" + id + ",");
-      OUT_JSON_FILE.print("\"region-id\":" + regionList.get(id - 1));
-      OUT_JSON_FILE.print("}");
-      OUT_JSON_FILE.print("},");
-      OUT_JSON_FILE.flush();
-
-    }
-
-    // Link newly generated nodes
-    for (Node node : getSimulatedNodes()) {
-      node.joinNetwork();
-    }
-
-    // Designates a random node (nodes in list are randomized) to mint the genesis block
-    getSimulatedNodes().get(0).genesisBlock();
-  }
-
-  public static void constructNetworkWithFarmers(int numFarmers) {
+  public static void constructNetworkWithAllNodes(int numNodes, String nodeType) {
 
     // Random distribution of nodes per region
     double[] regionDistribution = getRegionDistribution();
@@ -365,30 +326,34 @@ public class Main {
     // List of churn nodes.
     List<Boolean> churnNodes = makeRandomList(CHURN_NODE_RATE);
 
-    for (int id = 1; id <= numFarmers; id++) {
-      // Each node gets assigned a region, its degree, mining power, routing table and
-      // consensus algorithm
-      Farmer farmer = new Farmer(
-              id, degreeList.get(id - 1) + 1, regionList.get(id - 1), genMiningPower(), TABLE, useCBRNodes.get(id - 1), churnNodes.get(id - 1), chia_depth
-      );
-      // Add the node to the list of simulated nodes
-      addNode(farmer);
 
+    for (int id = 1; id <= numNodes; id++) {
+      // Each node gets assigned a region, its degree, mining power, routing table
+      // add based on nodeType
+      if(nodeType == "farmer") {
+        Farmer farmer = new Farmer(id, degreeList.get(id - 1) + 1, regionList.get(id - 1), genMiningPower(), TABLE, useCBRNodes.get(id - 1), churnNodes.get(id - 1));
+        addNode(farmer);
+      }
+      else {
+        Node node = new Node(id, degreeList.get(id - 1) + 1, regionList.get(id - 1), genMiningPower(), TABLE, useCBRNodes.get(id - 1), churnNodes.get(id - 1));
+        addNode(node);
+      }
+
+      // Add the node to the list of simulated nodes
       OUT_JSON_FILE.print("{");
-      OUT_JSON_FILE.print("\"kind\":\"add-farmer\",");
+      OUT_JSON_FILE.print("\"kind\":\"add-node\",");
       OUT_JSON_FILE.print("\"content\":{");
       OUT_JSON_FILE.print("\"timestamp\":0,");
-      OUT_JSON_FILE.print("\"farmer-id\":" + id + ",");
+      OUT_JSON_FILE.print("\"node-id\":" + id + ",");
       OUT_JSON_FILE.print("\"region-id\":" + regionList.get(id - 1));
       OUT_JSON_FILE.print("}");
       OUT_JSON_FILE.print("},");
       OUT_JSON_FILE.flush();
-
     }
 
     // Link newly generated nodes
-    for (Node farmer : getSimulatedNodes()) {
-      ((Farmer) farmer).joinNetwork();
+    for (Node node : getSimulatedNodes()) {
+      node.joinNetwork();
     }
 
     // Designates a random node (nodes in list are randomized) to mint the genesis block
