@@ -55,19 +55,20 @@ public class Farmer extends Node{
         // this is specified by the 'chia_k' parameter in the configs. Chia default is 3
         ChiaBlock[] currentBlocks = Paths.toArray(new ChiaBlock[PATH_COUNT]);
         for(int i = 0; i < PATH_COUNT; i++){
+            // if we have not yet seen the max number of paths, add the block to the empty branch tracker
+            if(currentBlocks[i] == null) {
+                Paths.add((ChiaBlock) newBlock);
+                replaced = true;
+                break;
+            }
             // if the block is the child of the current branch head, extend that branch with the child
-            if(newBlock.getParent() != null && newBlock.getParent().getId() == currentBlocks[i].getId()) {
+            else if(newBlock.getParent() != null && newBlock.getParent().getId() == currentBlocks[i].getId()) {
                 Paths.remove(currentBlocks[i]);
                 Paths.add((ChiaBlock) newBlock);
                 replaced = true;
                 break;
             }
-            // if we have not yet seen the max number of paths, add the block to the empty branch tracker
-            else if(currentBlocks[i] == null) {
-                Paths.add((ChiaBlock) newBlock);
-                replaced = true;
-                break;
-            }
+
             // if the new block belongs to a branch with a better quality than an existing branch
             // we want to remove the lowest quality, not just the first one with a
             // lower quality than the new block
@@ -78,18 +79,21 @@ public class Farmer extends Node{
         }
 
         if(idx >= 0 && !replaced){
+            System.out.println(Paths);
             Paths.poll();
+            System.out.println(Paths);
             Paths.add((ChiaBlock) newBlock);
             replaced = true;
         }
         // if one of the conditions above are met, then we will have a valid idx
         if(replaced) {
             this.setCurrentBlock(newBlock);
-            printAddBlock(newBlock);
         }
         else {
             System.err.println("Block was not added to chain - investigate");
         }
+        printAddBlock(newBlock);
+        arriveBlock(newBlock, this);
     }
 
     @Override
@@ -105,7 +109,11 @@ public class Farmer extends Node{
 
     @Override
     public void receiveBlock(Block block) {
-        // TODO do we need logic to handle orphans? I'm not sure what the intent was by including that in Node.java
+        // skip un-finalized blocks
+        if(!((ChiaBlock) block).isFinalized()) {
+            return;
+        }
+
         // Algorithm 2 from Chia paper
         boolean validBlock = false;
 
@@ -113,12 +121,13 @@ public class Farmer extends Node{
         for (int i = 0; i < PATH_COUNT; i++) {
             validBlock = validBlock || Simulator.getConsensusAlgo().isReceivedBlockValid(block, currentBlocks[i]);
         }
-        if (validBlock && ((ChiaBlock) block).isFinalized()) {
+
+        if (validBlock) {
             this.addToChain(block);
             this.minting();
             this.sendInv(block);
-        }
-        else {
+        } else if (!this.getOrphans().contains(block)) {
+            this.addOrphans(block, this.getCurrentBlock());
             arriveBlock(block, this);
         }
     }
