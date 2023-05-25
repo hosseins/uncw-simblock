@@ -20,7 +20,7 @@ public class ChiaProofOfSpace extends AbstractConsensusAlgo{
         }
 
         ChiaBlock unFinalizedBlock = this.createUnFinalizedBlock((Farmer) node);
-        long delay = 1 + (long) (Math.random() * 1000);
+        long delay = 1 + (long) (Math.random() * 100);
 
         return new VDFTask(node, delay, unFinalizedBlock);
     }
