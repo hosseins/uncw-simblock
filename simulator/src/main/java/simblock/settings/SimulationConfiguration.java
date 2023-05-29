@@ -183,8 +183,11 @@ public class SimulationConfiguration {
             0.72f, 0.73f, 0.74f, 0.75f, 0.76f, 0.77f, 0.78f, 0.79f, 0.8f, 0.81f, 0.82f, 0.83f, 0.84f, 0.85f, 0.86f,
             0.87f, 0.88f, 0.89f, 0.9f, 0.91f, 0.92f, 0.93f, 0.94f, 0.95f, 0.96f
     };
-
-
+    /**
+     * parameters specifying the time for VDF computation in Chia
+     */
+    public static final int VDF_MIN_TIME = 100;
+    public static final int VDF_TIME_RANGE = 10;
     /**
      * parameter specifying the number of blocks an honest farmer should mine at each level
      * when using the Chia consensus algorithm

@@ -31,450 +31,444 @@ import static simblock.settings.SimulationConfiguration.*;
 import static simblock.simulator.Main.OUT_JSON_FILE;
 import static simblock.simulator.Network.getBandwidth;
 import static simblock.simulator.Simulator.arriveBlock;
-import static simblock.simulator.Timer.*;
+import static simblock.simulator.Timer.getClock;
 
 /**
  * A class representing a node in the network.
  */
 public class Node {
-  /**
-   * Unique node ID.
-   */
-  private final int nodeID;
+    /**
+     * Unique node ID.
+     */
+    private final int nodeID;
 
-  /**
-   * Region assigned to the node.
-   */
-  private final int region;
+    /**
+     * Region assigned to the node.
+     */
+    private final int region;
 
-  /**
-   * Mining power assigned to the node.
-   */
-  private final long miningPower;
+    /**
+     * Mining power assigned to the node.
+     */
+    private final long miningPower;
+    /**
+     * Orphaned blocks known to node.
+     */
+    private final Set<Block> orphans = new HashSet<>();
+    //TODO
+    private final ArrayList<AbstractMessageTask> messageQue = new ArrayList<>();
+    // TODO
+    private final Set<Block> downloadingBlocks = new HashSet<>();
+    /**
+     * Processing time of tasks expressed in milliseconds.
+     */
+    private final long processingTime = 2;
+    /**
+     * A nodes routing table.
+     */
+    private AbstractRoutingTable routingTable;
+    /**
+     * Whether the node uses compact block relay.
+     */
+    private final boolean useCBR;
+    /**
+     * The node causes churn.
+     */
+    private final boolean isChurnNode;
+    /**
+     * The current block.
+     */
+    private Block currentBlock;
+    /**
+     * The current minting task
+     */
+    private AbstractMintingTask mintingTask = null;
+    /**
+     * In the process of sending blocks.
+     */
+    // TODO verify
+    private boolean sendingBlock = false;
+    /**
+     * Instantiates a new Node.
+     *
+     * @param nodeID           the node id
+     * @param numConnection    the number of connections a node can have
+     * @param region           the region
+     * @param miningPower      the mining power
+     * @param routingTableName the routing table name
+     * @param useCBR           whether the node uses compact block relay
+     * @param isChurnNode      whether the node causes churn
+     */
+    public Node(
+            int nodeID, int numConnection, int region, long miningPower, String routingTableName, boolean useCBR, boolean isChurnNode
+    ) {
+        this.nodeID = nodeID;
+        this.region = region;
+        this.miningPower = miningPower;
+        this.useCBR = useCBR;
+        this.isChurnNode = isChurnNode;
 
-  /**
-   * A nodes routing table.
-   */
-  private AbstractRoutingTable routingTable;
-
-  /**
-   * Whether the node uses compact block relay.
-   */
-  private boolean useCBR;
-
-  /**
-   * The node causes churn.
-   */
-  private boolean isChurnNode;
-
-  /**
-   * The current block.
-   */
-  private Block currentBlock;
-
-  /**
-   * Orphaned blocks known to node.
-   */
-  private final Set<Block> orphans = new HashSet<>();
-
-  public AbstractMintingTask getMintingTask() {
-    return mintingTask;
-  }
-
-  /**
-   * The current minting task
-   */
-  private AbstractMintingTask mintingTask = null;
-
-  /**
-   * In the process of sending blocks.
-   */
-  // TODO verify
-  private boolean sendingBlock = false;
-
-  //TODO
-  private final ArrayList<AbstractMessageTask> messageQue = new ArrayList<>();
-  // TODO
-  private final Set<Block> downloadingBlocks = new HashSet<>();
-
-  /**
-   * Processing time of tasks expressed in milliseconds.
-   */
-  private final long processingTime = 2;
-
-
-  /**
-   * Instantiates a new Node.
-   *
-   * @param nodeID            the node id
-   * @param numConnection     the number of connections a node can have
-   * @param region            the region
-   * @param miningPower       the mining power
-   * @param routingTableName  the routing table name
-   * @param useCBR            whether the node uses compact block relay
-   * @param isChurnNode       whether the node causes churn
-   */
-  public Node(
-      int nodeID, int numConnection, int region, long miningPower, String routingTableName, boolean useCBR, boolean isChurnNode
-  ) {
-    this.nodeID = nodeID;
-    this.region = region;
-    this.miningPower = miningPower;
-    this.useCBR = useCBR;
-    this.isChurnNode = isChurnNode;
-
-    try {
-      this.routingTable = (AbstractRoutingTable) Class.forName(routingTableName).getConstructor(
-          Node.class).newInstance(this);
-      this.setNumConnection(numConnection);
-    } catch (Exception e) {
-      e.printStackTrace();
+        try {
+            this.routingTable = (AbstractRoutingTable) Class.forName(routingTableName).getConstructor(
+                    Node.class).newInstance(this);
+            this.setNumConnection(numConnection);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
-  }
 
-  /**
-   * Gets the node id.
-   *
-   * @return the node id
-   */
-  public int getNodeID() {
-    return this.nodeID;
-  }
-
-  /**
-   * Gets the region ID assigned to a node.
-   *
-   * @return the region
-   */
-  public int getRegion() {
-    return this.region;
-  }
-
-  /**
-   * Gets mining power.
-   *
-   * @return the mining power
-   */
-  public long getMiningPower() {
-    return this.miningPower;
-  }
-
-
-  /**
-   * Gets routing table.
-   *
-   * @return the routing table
-   */
-  public AbstractRoutingTable getRoutingTable() {
-    return this.routingTable;
-  }
-
-  /**
-   * Gets the current block.
-   *
-   * @return the block
-   */
-  public Block getCurrentBlock() {
-    return this.currentBlock;
-  }
-
-  public void setCurrentBlock(Block newBlock){
-    this.currentBlock = newBlock;
-  }
-  /**
-   * Gets all orphans known to node.
-   *
-   * @return the orphans
-   */
-  public Set<Block> getOrphans() {
-    return this.orphans;
-  }
-
-  /**
-   * Gets the number of connections a node can have.
-   *
-   * @return the number of connection
-   */
-  @SuppressWarnings("unused")
-  public int getNumConnection() {
-    return this.routingTable.getNumConnection();
-  }
-
-  /**
-   * Sets the number of connections a node can have.
-   *
-   * @param numConnection the n connection
-   */
-  public void setNumConnection(int numConnection) {
-    this.routingTable.setNumConnection(numConnection);
-  }
-
-  /**
-   * Gets the nodes neighbors.
-   *
-   * @return the neighbors
-   */
-  public ArrayList<Node> getNeighbors() {
-    return this.routingTable.getNeighbors();
-  }
-
-  /**
-   * Adds the node as a neighbor.
-   *
-   * @param node the node to be added as a neighbor
-   * @return the success state of the operation
-   */
-  @SuppressWarnings("UnusedReturnValue")
-  public boolean addNeighbor(Node node) {
-    return this.routingTable.addNeighbor(node);
-  }
-
-  /**
-   * Removes the neighbor form the node.
-   *
-   * @param node the node to be removed as a neighbor
-   * @return the success state of the operation
-   */
-  @SuppressWarnings("unused")
-  public boolean removeNeighbor(Node node) {
-    return this.routingTable.removeNeighbor(node);
-  }
-
-  /**
-   * Initializes the routing table.
-   */
-  public void joinNetwork() {
-    this.routingTable.initTable();
-  }
-
-  /**
-   * Mint the genesis block.
-   */
-  public void genesisBlock() {
-    Block genesis = Simulator.getConsensusAlgo().genesisBlock(this);
-    this.receiveBlock(genesis);
-  }
-
-  /**
-   * Adds a new block to the to chain. If node was minting that task instance is abandoned, and
-   * the new block arrival is handled.
-   *
-   * @param newBlock the new block
-   */
-  public void addToChain(Block newBlock) {
-    // If the node has been minting
-    if (this.mintingTask != null) {
-      Timer.getSimulationTimer().removeTask(this.mintingTask);
-      this.mintingTask = null;
+    public AbstractMintingTask getMintingTask() {
+        return mintingTask;
     }
-    // Update the current block
-    this.currentBlock = newBlock;
-    printAddBlock(newBlock);
-    // Observe and handle new block arrival
-    arriveBlock(newBlock, this);
-  }
 
-  /**
-   * Logs the provided block to the logfile.
-   *
-   * @param newBlock the block to be logged
-   */
-  protected void printAddBlock(Block newBlock) {
-    OUT_JSON_FILE.print("{");
-    OUT_JSON_FILE.print("\"kind\":\"add-block\",");
-    OUT_JSON_FILE.print("\"content\":{");
-    OUT_JSON_FILE.print("\"timestamp\":" + getClock() + ",");
-    OUT_JSON_FILE.print("\"node-id\":" + this.getNodeID() + ",");
-    OUT_JSON_FILE.print("\"block-id\":" + newBlock.getId());
-    OUT_JSON_FILE.print("}");
-    OUT_JSON_FILE.print("},");
-    OUT_JSON_FILE.flush();
-  }
-
-  /**
-   * Add orphans.
-   *
-   * @param orphanBlock the orphan block
-   * @param validBlock  the valid block
-   */
-  //TODO check this out later
-  public void addOrphans(Block orphanBlock, Block validBlock) {
-    if (orphanBlock != validBlock) {
-      this.orphans.add(orphanBlock);
-      this.orphans.remove(validBlock);
-      if (validBlock == null || orphanBlock.getHeight() > validBlock.getHeight()) {
-        this.addOrphans(orphanBlock.getParent(), validBlock);
-      } else if (orphanBlock.getHeight() == validBlock.getHeight()) {
-        this.addOrphans(orphanBlock.getParent(), validBlock.getParent());
-      } else {
-        this.addOrphans(orphanBlock, validBlock.getParent());
-      }
+    public void setMintingTask(AbstractMintingTask task) {
+        this.mintingTask = task;
     }
-  }
 
-  /**
-   * Generates a new minting task and registers it
-   */
-  public void minting() {
-    AbstractMintingTask task = Simulator.getConsensusAlgo().CreateMintingTask(this);
-    this.mintingTask = task;
-    if (task != null) {
-      Timer.getSimulationTimer().putTask(task);
+    /**
+     * Gets the node id.
+     *
+     * @return the node id
+     */
+    public int getNodeID() {
+        return this.nodeID;
     }
-  }
 
-  /**
-   * Send inv.
-   *
-   * @param block the block
-   */
-  public void sendInv(Block block) {
-    for (Node to : this.routingTable.getNeighbors()) {
-      AbstractMessageTask task = new InvMessageTask(this, to, block);
-      Timer.getSimulationTimer().putTask(task);
+    /**
+     * Gets the region ID assigned to a node.
+     *
+     * @return the region
+     */
+    public int getRegion() {
+        return this.region;
     }
-  }
 
-  /**
-   * Receive block.
-   *
-   * @param block the block
-   */
-  public void receiveBlock(Block block) {
-    if (Simulator.getConsensusAlgo().isReceivedBlockValid(block, this.currentBlock)) {
-      if (this.currentBlock != null && !this.currentBlock.isOnSameChainAs(block)) {
-        // If orphan mark orphan
-        this.addOrphans(this.currentBlock, block);
-      }
-      // Else add to canonical chain
-      this.addToChain(block);
-      // Generates a new minting task
-      this.minting();
-      // Advertise received block
-      this.sendInv(block);
-    } else if (!this.orphans.contains(block) && !block.isOnSameChainAs(this.currentBlock)) {
-      // TODO better understand - what if orphan is not valid?
-      // If the block was not valid but was an unknown orphan and is not on the same chain as the
-      // current block
-      this.addOrphans(block, this.currentBlock);
-      arriveBlock(block, this);
+    /**
+     * Gets mining power.
+     *
+     * @return the mining power
+     */
+    public long getMiningPower() {
+        return this.miningPower;
     }
-  }
 
-  /**
-   * Receive message.
-   *
-   * @param message the message
-   */
-  public void receiveMessage(AbstractMessageTask message) {
-    Node from = message.getFrom();
 
-    if (message instanceof InvMessageTask) {
-      Block block = ((InvMessageTask) message).getBlock();
-      if (!this.orphans.contains(block) && !this.downloadingBlocks.contains(block)) {
+    /**
+     * Gets routing table.
+     *
+     * @return the routing table
+     */
+    public AbstractRoutingTable getRoutingTable() {
+        return this.routingTable;
+    }
+
+    /**
+     * Gets the current block.
+     *
+     * @return the block
+     */
+    public Block getCurrentBlock() {
+        return this.currentBlock;
+    }
+
+    public void setCurrentBlock(Block newBlock) {
+        this.currentBlock = newBlock;
+    }
+
+    /**
+     * Gets all orphans known to node.
+     *
+     * @return the orphans
+     */
+    public Set<Block> getOrphans() {
+        return this.orphans;
+    }
+
+    /**
+     * Gets the number of connections a node can have.
+     *
+     * @return the number of connection
+     */
+    @SuppressWarnings("unused")
+    public int getNumConnection() {
+        return this.routingTable.getNumConnection();
+    }
+
+    /**
+     * Sets the number of connections a node can have.
+     *
+     * @param numConnection the n connection
+     */
+    public void setNumConnection(int numConnection) {
+        this.routingTable.setNumConnection(numConnection);
+    }
+
+    /**
+     * Gets the nodes neighbors.
+     *
+     * @return the neighbors
+     */
+    public ArrayList<Node> getNeighbors() {
+        return this.routingTable.getNeighbors();
+    }
+
+    /**
+     * Adds the node as a neighbor.
+     *
+     * @param node the node to be added as a neighbor
+     * @return the success state of the operation
+     */
+    @SuppressWarnings("UnusedReturnValue")
+    public boolean addNeighbor(Node node) {
+        return this.routingTable.addNeighbor(node);
+    }
+
+    /**
+     * Removes the neighbor form the node.
+     *
+     * @param node the node to be removed as a neighbor
+     * @return the success state of the operation
+     */
+    @SuppressWarnings("unused")
+    public boolean removeNeighbor(Node node) {
+        return this.routingTable.removeNeighbor(node);
+    }
+
+    /**
+     * Initializes the routing table.
+     */
+    public void joinNetwork() {
+        this.routingTable.initTable();
+    }
+
+    /**
+     * Mint the genesis block.
+     */
+    public void genesisBlock() {
+        Block genesis = Simulator.getConsensusAlgo().genesisBlock(this);
+        this.receiveBlock(genesis);
+    }
+
+    /**
+     * Adds a new block to the to chain. If node was minting that task instance is abandoned, and
+     * the new block arrival is handled.
+     *
+     * @param newBlock the new block
+     */
+    public void addToChain(Block newBlock) {
+        // If the node has been minting
+        if (this.mintingTask != null) {
+            Timer.getSimulationTimer().removeTask(this.mintingTask);
+            this.mintingTask = null;
+        }
+        // Update the current block
+        this.currentBlock = newBlock;
+        printAddBlock(newBlock);
+        // Observe and handle new block arrival
+        arriveBlock(newBlock, this);
+    }
+
+    /**
+     * Logs the provided block to the logfile.
+     *
+     * @param newBlock the block to be logged
+     */
+    protected void printAddBlock(Block newBlock) {
+        OUT_JSON_FILE.print("{");
+        OUT_JSON_FILE.print("\"kind\":\"add-block\",");
+        OUT_JSON_FILE.print("\"content\":{");
+        OUT_JSON_FILE.print("\"timestamp\":" + getClock() + ",");
+        OUT_JSON_FILE.print("\"node-id\":" + this.getNodeID() + ",");
+        OUT_JSON_FILE.print("\"block-id\":" + newBlock.getId());
+        OUT_JSON_FILE.print("}");
+        OUT_JSON_FILE.print("},");
+        OUT_JSON_FILE.flush();
+    }
+
+    /**
+     * Add orphans.
+     *
+     * @param orphanBlock the orphan block
+     * @param validBlock  the valid block
+     */
+    //TODO check this out later
+    public void addOrphans(Block orphanBlock, Block validBlock) {
+        if (orphanBlock != validBlock) {
+            this.orphans.add(orphanBlock);
+            this.orphans.remove(validBlock);
+            if (validBlock == null || orphanBlock.getHeight() > validBlock.getHeight()) {
+                this.addOrphans(orphanBlock.getParent(), validBlock);
+            } else if (orphanBlock.getHeight() == validBlock.getHeight()) {
+                this.addOrphans(orphanBlock.getParent(), validBlock.getParent());
+            } else {
+                this.addOrphans(orphanBlock, validBlock.getParent());
+            }
+        }
+    }
+
+    /**
+     * Generates a new minting task and registers it
+     */
+    public void minting() {
+        AbstractMintingTask task = Simulator.getConsensusAlgo().CreateMintingTask(this);
+        this.mintingTask = task;
+        if (task != null) {
+            Timer.getSimulationTimer().putTask(task);
+        }
+    }
+
+    /**
+     * Send inv.
+     *
+     * @param block the block
+     */
+    public void sendInv(Block block) {
+        for (Node to : this.routingTable.getNeighbors()) {
+            AbstractMessageTask task = new InvMessageTask(this, to, block);
+            Timer.getSimulationTimer().putTask(task);
+        }
+    }
+
+    /**
+     * Receive block.
+     *
+     * @param block the block
+     */
+    public void receiveBlock(Block block) {
         if (Simulator.getConsensusAlgo().isReceivedBlockValid(block, this.currentBlock)) {
-          AbstractMessageTask task = new RecMessageTask(this, from, block);
-          Timer.getSimulationTimer().putTask(task);
-          downloadingBlocks.add(block);
-        } else if (!block.isOnSameChainAs(this.currentBlock)) {
-          // get new orphan block
-          AbstractMessageTask task = new RecMessageTask(this, from, block);
-          Timer.getSimulationTimer().putTask(task);
-          downloadingBlocks.add(block);
+            if (this.currentBlock != null && !this.currentBlock.isOnSameChainAs(block)) {
+                // If orphan mark orphan
+                this.addOrphans(this.currentBlock, block);
+            }
+            // Else add to canonical chain
+            this.addToChain(block);
+            // Generates a new minting task
+            this.minting();
+            // Advertise received block
+            this.sendInv(block);
+        } else if (!this.orphans.contains(block) && !block.isOnSameChainAs(this.currentBlock)) {
+            // TODO better understand - what if orphan is not valid?
+            // If the block was not valid but was an unknown orphan and is not on the same chain as the
+            // current block
+            this.addOrphans(block, this.currentBlock);
+            arriveBlock(block, this);
         }
-      }
     }
 
-    if (message instanceof RecMessageTask) {
-      this.messageQue.add((RecMessageTask) message);
-      if (!sendingBlock) {
-        this.sendNextBlockMessage();
-      }
+    /**
+     * Receive message.
+     *
+     * @param message the message
+     */
+    public void receiveMessage(AbstractMessageTask message) {
+        Node from = message.getFrom();
+
+        if (message instanceof InvMessageTask) {
+            Block block = ((InvMessageTask) message).getBlock();
+            if (!this.orphans.contains(block) && !this.downloadingBlocks.contains(block)) {
+                if (Simulator.getConsensusAlgo().isReceivedBlockValid(block, this.currentBlock)) {
+                    AbstractMessageTask task = new RecMessageTask(this, from, block);
+                    Timer.getSimulationTimer().putTask(task);
+                    downloadingBlocks.add(block);
+                } else if (!block.isOnSameChainAs(this.currentBlock)) {
+                    // get new orphan block
+                    AbstractMessageTask task = new RecMessageTask(this, from, block);
+                    Timer.getSimulationTimer().putTask(task);
+                    downloadingBlocks.add(block);
+                }
+            }
+        }
+
+        if (message instanceof RecMessageTask) {
+            this.messageQue.add(message);
+            if (!sendingBlock) {
+                this.sendNextBlockMessage();
+            }
+        }
+
+        if (message instanceof GetBlockTxnMessageTask) {
+            this.messageQue.add(message);
+            if (!sendingBlock) {
+                this.sendNextBlockMessage();
+            }
+        }
+
+        if (message instanceof CmpctBlockMessageTask) {
+            Block block = ((CmpctBlockMessageTask) message).getBlock();
+            Random random = new Random();
+            float CBRfailureRate = this.isChurnNode ? CBR_FAILURE_RATE_FOR_CHURN_NODE : CBR_FAILURE_RATE_FOR_CONTROL_NODE;
+            boolean success = random.nextDouble() > CBRfailureRate;
+            if (success) {
+                downloadingBlocks.remove(block);
+                this.receiveBlock(block);
+            } else {
+                AbstractMessageTask task = new GetBlockTxnMessageTask(this, from, block);
+                Timer.getSimulationTimer().putTask(task);
+            }
+        }
+
+        if (message instanceof BlockMessageTask) {
+            Block block = ((BlockMessageTask) message).getBlock();
+            downloadingBlocks.remove(block);
+            this.receiveBlock(block);
+        }
     }
 
-    if(message instanceof GetBlockTxnMessageTask){
-			this.messageQue.add((GetBlockTxnMessageTask) message);
-			if(!sendingBlock){
-				this.sendNextBlockMessage();
-			}
-		}
 
-    if(message instanceof CmpctBlockMessageTask){
-			Block block = ((CmpctBlockMessageTask) message).getBlock();
-      Random random = new Random();
-      float CBRfailureRate = this.isChurnNode ? CBR_FAILURE_RATE_FOR_CHURN_NODE : CBR_FAILURE_RATE_FOR_CONTROL_NODE;
-			boolean success = random.nextDouble() > CBRfailureRate ? true : false;
-			if(success){
-				downloadingBlocks.remove(block);
-				this.receiveBlock(block);
-			}else{
-				AbstractMessageTask task = new GetBlockTxnMessageTask(this, from, block);
-              Timer.getSimulationTimer().putTask(task);
-			}
-		}
-
-    if (message instanceof BlockMessageTask) {
-      Block block = ((BlockMessageTask) message).getBlock();
-      downloadingBlocks.remove(block);
-      this.receiveBlock(block);
-    }
-  }
-
-
-  /**
-   * Gets block size when the node fails compact block relay.
-   */
-  private long getFailedBlockSize(){
-		Random random = new Random();
-			if(this.isChurnNode){
-				int index = random.nextInt(CBR_FAILURE_BLOCK_SIZE_DISTRIBUTION_FOR_CHURN_NODE.length);
-				return (long)(BLOCK_SIZE * CBR_FAILURE_BLOCK_SIZE_DISTRIBUTION_FOR_CHURN_NODE[index]);
-			}else{
-				int index = random.nextInt(CBR_FAILURE_BLOCK_SIZE_DISTRIBUTION_FOR_CONTROL_NODE.length);
-				return (long)(BLOCK_SIZE * CBR_FAILURE_BLOCK_SIZE_DISTRIBUTION_FOR_CONTROL_NODE[index]);
-			}
-	}
-
-  /**
-   * Send next block message.
-   */
-  // send a block to the sender of the next queued recMessage
-  public void sendNextBlockMessage() {
-    if (this.messageQue.size() > 0) {
-      Node to = this.messageQue.get(0).getFrom();
-      long bandwidth = getBandwidth(this.getRegion(), to.getRegion());
-
-      AbstractMessageTask messageTask;
-
-      if(this.messageQue.get(0) instanceof RecMessageTask){
-        Block block = ((RecMessageTask) this.messageQue.get(0)).getBlock();
-        // If use compact block relay.
-        if(this.messageQue.get(0).getFrom().useCBR && this.useCBR) {
-          // Convert bytes to bits and divide by the bandwidth expressed as bit per millisecond, add
-          // processing time.
-          long delay = COMPACT_BLOCK_SIZE * 8 / (bandwidth / 1000) + processingTime;
-
-          // Send compact block message.
-          messageTask = new CmpctBlockMessageTask(this, to, block, delay);
+    /**
+     * Gets block size when the node fails compact block relay.
+     */
+    private long getFailedBlockSize() {
+        Random random = new Random();
+        if (this.isChurnNode) {
+            int index = random.nextInt(CBR_FAILURE_BLOCK_SIZE_DISTRIBUTION_FOR_CHURN_NODE.length);
+            return (long) (BLOCK_SIZE * CBR_FAILURE_BLOCK_SIZE_DISTRIBUTION_FOR_CHURN_NODE[index]);
         } else {
-          // Else use legacy protocol.
-          long delay = BLOCK_SIZE * 8 / (bandwidth / 1000) + processingTime;
-          messageTask = new BlockMessageTask(this, to, block, delay);
+            int index = random.nextInt(CBR_FAILURE_BLOCK_SIZE_DISTRIBUTION_FOR_CONTROL_NODE.length);
+            return (long) (BLOCK_SIZE * CBR_FAILURE_BLOCK_SIZE_DISTRIBUTION_FOR_CONTROL_NODE[index]);
         }
-      } else if(this.messageQue.get(0) instanceof GetBlockTxnMessageTask) {
-        // Else from requests missing transactions.
-        Block block = ((GetBlockTxnMessageTask) this.messageQue.get(0)).getBlock();
-        long delay = getFailedBlockSize() * 8 / (bandwidth / 1000) + processingTime;
-        messageTask = new BlockMessageTask(this, to, block, delay);
-      } else {
-        throw new UnsupportedOperationException();
-      }
-      
-      sendingBlock = true;
-      this.messageQue.remove(0);
-      Timer.getSimulationTimer().putTask(messageTask);
-    } else {
-      sendingBlock = false;
     }
-  }
+
+    /**
+     * Send next block message.
+     */
+    // send a block to the sender of the next queued recMessage
+    public void sendNextBlockMessage() {
+        if (this.messageQue.size() > 0) {
+            Node to = this.messageQue.get(0).getFrom();
+            long bandwidth = getBandwidth(this.getRegion(), to.getRegion());
+
+            AbstractMessageTask messageTask;
+
+            if (this.messageQue.get(0) instanceof RecMessageTask) {
+                Block block = ((RecMessageTask) this.messageQue.get(0)).getBlock();
+                // If use compact block relay.
+                if (this.messageQue.get(0).getFrom().useCBR && this.useCBR) {
+                    // Convert bytes to bits and divide by the bandwidth expressed as bit per millisecond, add
+                    // processing time.
+                    long delay = COMPACT_BLOCK_SIZE * 8 / (bandwidth / 1000) + processingTime;
+
+                    // Send compact block message.
+                    messageTask = new CmpctBlockMessageTask(this, to, block, delay);
+                } else {
+                    // Else use legacy protocol.
+                    long delay = BLOCK_SIZE * 8 / (bandwidth / 1000) + processingTime;
+                    messageTask = new BlockMessageTask(this, to, block, delay);
+                }
+            } else if (this.messageQue.get(0) instanceof GetBlockTxnMessageTask) {
+                // Else from requests missing transactions.
+                Block block = ((GetBlockTxnMessageTask) this.messageQue.get(0)).getBlock();
+                long delay = getFailedBlockSize() * 8 / (bandwidth / 1000) + processingTime;
+                messageTask = new BlockMessageTask(this, to, block, delay);
+            } else {
+                throw new UnsupportedOperationException();
+            }
+
+            sendingBlock = true;
+            this.messageQue.remove(0);
+            Timer.getSimulationTimer().putTask(messageTask);
+        } else {
+            sendingBlock = false;
+        }
+    }
 }

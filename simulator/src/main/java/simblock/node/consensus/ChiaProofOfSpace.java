@@ -12,7 +12,10 @@ import simblock.task.VDFTask;
 
 import java.math.BigInteger;
 
-public class ChiaProofOfSpace extends AbstractConsensusAlgo{
+import static simblock.settings.SimulationConfiguration.VDF_MIN_TIME;
+import static simblock.settings.SimulationConfiguration.VDF_TIME_RANGE;
+
+public class ChiaProofOfSpace extends AbstractConsensusAlgo {
     @Override
     public AbstractMintingTask CreateMintingTask(Node node) {
         if (node == null || node.getCurrentBlock() == null || !(node instanceof Farmer)) {
@@ -20,22 +23,24 @@ public class ChiaProofOfSpace extends AbstractConsensusAlgo{
         }
 
         ChiaBlock unFinalizedBlock = this.createUnFinalizedBlock((Farmer) node);
-        long delay = 1 + (long) (Math.random() * 100);
 
-        return new VDFTask(node, delay, unFinalizedBlock);
+        // Should the delay be random like this or based on the quality?
+        // Should we add a check here to prevent blocks under a certain quality from being propagated?
+        // Do we need to propogate un-finalized blocks to the farmers? Is there any reason to?
+        long delay = VDF_MIN_TIME + (long) (Math.random() * VDF_TIME_RANGE);
+
+        return new VDFTask(node, delay, unFinalizedBlock, ((Farmer) node).getMintingBlock());
     }
 
     @Override
     public boolean isReceivedBlockValid(Block receivedBlock, Block currentBlock) {
-        // TODO BRENNON
-        // returns true if received block is a PoSpace block that extends or replaces current block
-        // will extend if it is a child of current block
-        // will replace if current block is null or if currentBlock has a lower chain quality
+        // NOTE: in PoW this method checks that the received block has height 0 or has a difficulty greater than
+        //       the parents nextDifficulty attribute - do we need to check for that in PoSpace?
+
         return (receivedBlock instanceof ChiaBlock) && (
-                (receivedBlock.getParent() == currentBlock) ||
-                        (currentBlock == null) ||
+                (currentBlock == null) ||
                         (((ChiaBlock) receivedBlock).getChainQuality().compareTo(((ChiaBlock) currentBlock).getChainQuality()) > 0)
-                );
+        );
     }
 
     @Override
