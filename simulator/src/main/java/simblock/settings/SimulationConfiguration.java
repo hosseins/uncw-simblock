@@ -35,7 +35,7 @@ public class SimulationConfiguration {
      * The expected value of block generation interval. The difficulty of mining is automatically
      * adjusted by this value and the sum of mining power. (unit: millisecond)
      */
-    public static final long INTERVAL = 1000 * 60 * 10;//1000*60;//1000*30*5;//1000*60*10;
+    public static final long INTERVAL = 1000 * 15;//1000*60;//1000*30*5;//1000*60*10;
 
     /**
      * The average mining power of each node. Mining power corresponds to Hash Rate in Bitcoin, and
@@ -186,8 +186,8 @@ public class SimulationConfiguration {
     /**
      * parameters specifying the time for VDF computation in Chia
      */
-    public static final int VDF_MIN_TIME = 100;
-    public static final int VDF_TIME_RANGE = 10;
+    public static final int VDF_MIN_TIME = 10000;
+    public static final int VDF_TIME_RANGE = 10000;
     /**
      * parameter specifying the number of blocks an honest farmer should mine at each level
      * when using the Chia consensus algorithm

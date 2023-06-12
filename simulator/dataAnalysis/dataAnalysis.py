@@ -49,11 +49,17 @@ def get_propagation_info(json_list):
 
     # assertion: block_propagation_times is now a hashtable with keys consisting of each block id
     # and a value which is the propagation start timestamp and a propagation end timestamp
-    propagation_times = [block_propagation_times[x][1] - block_propagation_times[x][0] for x in
-                             block_propagation_times.keys()]
+
+    propagation_times = []
+    for x in block_propagation_times.keys():
+        if len(block_propagation_times[x]) >= 2:
+            propagation_times.append(block_propagation_times[x][1] - block_propagation_times[x][0])
+
     min_propagation_time = min(propagation_times)
     max_propagation_time = max(propagation_times)
     median_propagation_time = statistics.median(propagation_times)
+
+
 
     return min_propagation_time, max_propagation_time, median_propagation_time
 
