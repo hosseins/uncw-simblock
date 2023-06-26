@@ -64,6 +64,9 @@ public class Main {
     //TODO use logger
     public static PrintWriter STATIC_JSON_FILE;
 
+    public static PrintWriter LOCAL_CHAIN_FILE;
+
+
     static {
         try {
             CONF_FILE_URI = ClassLoader.getSystemResource("simulator.conf").toURI();
@@ -79,6 +82,9 @@ public class Main {
                     new BufferedWriter(new FileWriter(new File(OUT_FILE_URI.resolve("./output.json")))));
             STATIC_JSON_FILE = new PrintWriter(
                     new BufferedWriter(new FileWriter(new File(OUT_FILE_URI.resolve("./static.json")))));
+            LOCAL_CHAIN_FILE = new PrintWriter(
+                    new BufferedWriter(new FileWriter(new File(OUT_FILE_URI.resolve("./chains.txt"))))
+            );
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -121,7 +127,7 @@ public class Main {
         // Iterate over tasks and handle
         while (Timer.getSimulationTimer().getTask() != null) {
             if (Timer.getSimulationTimer().getTask() instanceof AbstractMintingTask task) {
-              if (task.getParent().getHeight() == currentBlockHeight) {
+                if (task.getParent().getHeight() == currentBlockHeight) {
                     currentBlockHeight++;
                 }
                 if (currentBlockHeight > END_BLOCK_HEIGHT) {
@@ -136,6 +142,9 @@ public class Main {
             // Execute task
             Timer.getSimulationTimer().runFirstNextTask();
         }
+
+        // Print each nodes local chain information
+        printLocalChains();
 
         // Print propagation information about all blocks
         printAllPropagation();
@@ -322,6 +331,15 @@ public class Main {
         }
     }
 
+    public static void printLocalChains() {
+        for (Node node : getSimulatedNodes()) {
+            Farmer farmer = (Farmer) node;
+            LOCAL_CHAIN_FILE.print(farmer.getLocalView() + "\n");
+        }
+        LOCAL_CHAIN_FILE.flush();
+        LOCAL_CHAIN_FILE.close();
+    }
+
     /**
      * Populate the list using the distribution.
      *
@@ -386,5 +404,4 @@ public class Main {
 
         return Math.max((int) (r * STDEV_OF_MINING_POWER + AVERAGE_MINING_POWER), 1);
     }
-
 }

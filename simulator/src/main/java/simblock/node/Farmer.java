@@ -26,6 +26,22 @@ public class Farmer extends Node {
         PoSpaceCount = new int[DEPTH];
     }
 
+    /**
+     * @return a string representing the farmers local view of the blockchain
+     * from left to right it represents the oldest to most recent blocks the farmer is aware of and considers part of the canonical chain.
+     */
+    public String getLocalView() {
+        String localView = this.getCurrentBlock().getId() + "";
+
+        Block currBlock = this.getCurrentBlock().getParent();
+        while (currBlock != null) {
+            localView = currBlock.getId() + ", " + localView;
+            currBlock = currBlock.getParent();
+        }
+
+        return localView;
+    }
+
     @Override
     public ChiaBlock getCurrentBlock() {
         return (ChiaBlock) super.getCurrentBlock();
@@ -98,4 +114,6 @@ public class Farmer extends Node {
     public ChiaBlock getMintingBlock() {
         return mintingBlock;
     }
+
+
 }
